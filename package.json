@@ -2,10 +2,11 @@
   "name": "sanitbackend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "npm run server",
-    "test": "npm run test"
+    "test": "npm run test",
+    "server": "nodemon server.js"
   },
   "repository": {
     "type": "git",
