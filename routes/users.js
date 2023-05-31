@@ -3,7 +3,8 @@ const router = express.Router();
 const { 
 getAll, 
 findOneUser,
-createOneUser } = require("../controllers/users");
+createOneUser
+} = require("../controllers/users");
 
 //-----------RUTAS GENERALES-------------//
 
