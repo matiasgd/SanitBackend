@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "npm run server",
-    "test": "npm run test",
+    "test": "mocha tests/*.tests.js",
     "server": "nodemon server.js"
   },
   "repository": {
@@ -29,5 +29,10 @@
     "mongoose-autopopulate": "^1.0.0",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.21"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "chai-http": "^4.3.0",
+    "mocha": "^10.2.0"
   }
 }
