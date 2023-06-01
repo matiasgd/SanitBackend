@@ -1,4 +1,5 @@
 const { Users } = require("../db_models");
+const mongoose = require("mongoose");
 
 module.exports = {
   // RUTAS GENERALES DE PEDIDO GET
@@ -14,6 +15,10 @@ module.exports = {
   findOneUser: async (req, res, next) => {
     try {
       const _id = req.params._id;
+      // Validar el formato de _id utilizando mongoose
+      if (!mongoose.isValidObjectId(_id)) {
+        return res.status(404).send("Invalid user ID");
+      }
       const user = await Users.findOne({ _id });
       if (!user) {
         return res.status(404).send("User not found");
@@ -29,6 +34,30 @@ module.exports = {
       const newUser = new Users(req.body);
       const savedUser = await newUser.save();
       res.send(savedUser);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  updateUser: async (req, res, next) => {
+    try {
+      const _id = req.params._id;
+      // Validar el formato de _id utilizando mongoose
+      if (!mongoose.isValidObjectId(_id)) {
+        return res.status(404).send("Invalid user ID");
+      }
+      const user = await Users.findOne({ _id });
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+      // Obtener los campos y sus nuevos valores del cuerpo de la solicitud
+      const updateFields = req.body
+      // Recorrer los campos y actualizar el objeto del usuario
+      Object.keys(updateFields).forEach((field) => {
+        user[field] = updateFields[field];
+      });
+      const updatedUser = await user.save();
+      res.send(updatedUser);
     } catch (err) {
       next(err);
     }

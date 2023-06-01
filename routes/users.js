@@ -3,7 +3,8 @@ const router = express.Router();
 const { 
 getAll, 
 findOneUser,
-createOneUser
+createOneUser,
+updateUser
 } = require("../controllers/users");
 
 //-----------RUTAS GENERALES-------------//
@@ -16,5 +17,8 @@ router.get("/:_id", findOneUser);
 
 // CREAR UN USUARIO
 router.post("/new", createOneUser);
+
+// MODIFICAR UN USUARIO
+router.put("/update/:_id", updateUser);
 
 module.exports = router;

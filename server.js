@@ -42,3 +42,6 @@ app.listen(port, () => {
 (async () => {
   await mongoDBHelpers.connect();
 })();
+
+
+module.exports =  app 
