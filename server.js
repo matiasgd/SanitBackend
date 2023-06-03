@@ -2,7 +2,7 @@ require("dotenv").config();
 const bodyParser = require("body-parser");
 const express = require("express");
 const app = express();
-const { port, corsOrigin } = require("./config");
+const { port, port_Test, nodeENV, corsOrigin } = require("./config");
 const cors = require("cors");
 const morgan = require("morgan");
 const { mongoDBHelpers } = require("./helpers");
@@ -35,13 +35,13 @@ app.use(function (err, req, res, next) {
 
 // START SERVER
 app.listen(port, () => {
-  console.log("Server listen on port", port);
+  const currentPort = nodeENV === "development" ? port : port_Test;
+  console.log("Server listen on port", currentPort);
 });
 
 // CONNECT TO MONGODB
 (async () => {
-  await mongoDBHelpers.connect();
+    await mongoDBHelpers.connect();
 })();
-
 
 module.exports =  app 

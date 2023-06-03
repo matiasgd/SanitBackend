@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { 
-getMyPatients,
-createPatient,
+const {
+  getMyPatients,
+  createPatient,
+  removeDoctorFromPatient,
 } = require("../controllers/patients");
 
 //-----------RUTAS GENERALES-------------//
@@ -11,7 +12,11 @@ createPatient,
 router.get("/:_id", getMyPatients);
 
 // CREAR PACIENTES
-router.post("/new", createPatient);
+router.post("/new/:doctorId", createPatient);
+
+// BORRAR UN PACIENTE
+router.delete("/:patientId/:doctorId", removeDoctorFromPatient);
+
 
 
 module.exports = router;

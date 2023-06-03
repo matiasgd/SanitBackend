@@ -9,7 +9,7 @@ describe("User Controller", () => {
   // Pruebas de pedidos GET
   describe("GET /users", () => {
     it("debería obtener todos los usuarios", async () => {
-      const res = await chai.request(app).get("/api/users");
+      const res = await chai.request(app).get("/api/users");  
       expect(res).to.have.status(200);
       expect(res.body).to.be.an("array");
     });

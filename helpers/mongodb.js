@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
-const { mongoURI } = require("../config");
+const { mongoURI, mongoTestURI, nodeENV } = require("../config");
+
+const URI = nodeENV === "development" ? mongoURI : mongoTestURI;
 
 const checkConnection = () => {
   console.log(mongoose.connection.readyState);
@@ -10,7 +12,7 @@ const connect = async () => {
   try {
     if (!checkConnection()) {
       console.log("Connecting...");
-      await mongoose.connect(mongoURI, {});
+      await mongoose.connect(URI, {});
     }
     console.log("Connected successfully");
   } catch (error) {
