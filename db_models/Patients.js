@@ -6,6 +6,7 @@ const Addresses = require("./Addresses");
 const schema = Schema({
   name: { type: String, required: true },
   lastName: { type: String, required: true },
+  localId: { type: String },
   birthdate: { type: Date },
   email: { type: String, required: true, unique: true },
   gender: {
@@ -28,6 +29,17 @@ const schema = Schema({
     ref: "addresses",
     autopopulate: true,
   },
+  // datos de doctor
+  doctors: {
+    type: [String],
+  },
+  previousDoctors: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "users",
+      autopopulate: true,
+    },
+  ],
 });
 
 // Hook post-save para crear la dirección después de guardar el paciente
