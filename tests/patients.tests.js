@@ -4,7 +4,8 @@ const { expect } = chai;
 chai.use(chaiHttp);
 const app = require("../server");
 const { Users, Patients } = require("../db_models");
-const { create } = require("../db_models/Users");
+const mongoose = require("mongoose");
+const { describe } = require("mocha");
 
 describe("Patient Controller", () => {
   let userId; // Variable para almacenar el ID del usuario
@@ -24,7 +25,6 @@ describe("Patient Controller", () => {
     await newUser.save();
 
     userId = newUser._id.toString(); // Almacenar el ID del usuario creado
-    console.log("userID", userId);
     // Crear algunos pacientes relacionados con el usuario
     const patients = [
       {
@@ -101,7 +101,7 @@ describe("Patient Controller", () => {
    };
 
    const doctor = await Users.findOne({})
-   const doctorId = doctor._id.toString()
+   const doctorId = doctor._id
       const res = await chai
         .request(app)
         .post(`/api/patients/new/${doctorId}`)
@@ -112,14 +112,35 @@ describe("Patient Controller", () => {
         localId: newPatient.localId,
       });
       expect(createdPatient).to.exist;
-      expect(createdPatient.doctors[0].toString()).to.equal(doctorId);
+
+      expect(createdPatient.doctors[0]._id).to.deep.equal(doctorId);      
     });
+  });
+
+  describe("PUT /patients/:patientId", () => {
+    it("debería devolver un mensaje de error si el ID enviado del paciente no existe", async () => {
+      const res = await chai
+        .request(app)
+        .put(`/api/patients/123123123123`)
+      expect(res).to.have.status(404);  
+      expect(res.text).to.equal("Paciente no encontrado");
+    });
+
+    it("debería actualizar un paciente", async () => {
+      const patient = await Patients.findOne(); // Obtén un paciente existente de la base de datos
+      const res = await chai
+        .request(app)
+        .put(`/api/patients/${patient._id}`)
+        .send({ name: "Paciente 1 actualizado" });
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an("object");
+      expect(res.body.name).to.equal("Paciente 1 actualizado");
   });
 
   describe("DELETE /patients/:patientId/:doctorId", () => {
     it("debería devolver un mensaje de error si el ID enviado del paciente no existe", async () => {
       const patient = await Patients.findOne(); // Obtén un paciente existente de la base de datos
-      const doctorId = patient.doctors[0]; // Obtén el ID de un médico asociado al paciente
+      const doctorId = patient.doctors[0]._id; // Obtén el ID de un médico asociado al paciente
       const res = await chai
         .request(app)
         .delete(`/api/patients/123123123123/${doctorId}`);
@@ -129,7 +150,7 @@ describe("Patient Controller", () => {
 
     it("debería devolver un mensaje de error si el ID del medico no se encuentra asociado al paciente", async () => {
       const patient = await Patients.findOne(); // Obtén un paciente existente de la base de datos
-      const doctorId = patient.doctors[0]; // Obtén el ID de un médico asociado al paciente
+      const doctorId = patient.doctors[0]._id; // Obtén el ID de un médico asociado al paciente
       const res = await chai
         .request(app)
         .delete(`/api/patients/${patient._id}/123123123123`);
@@ -137,18 +158,22 @@ describe("Patient Controller", () => {
       expect(res.text).to.equal("El médico no está asociado a este paciente");
     });
 
+
     it("debería eliminar un médico de un paciente", async () => {
       const patient = await Patients.findOne(); // Obtén un paciente existente de la base de datos
-      const doctorId = patient.doctors[0]; // Obtén el ID de un médico asociado al paciente
+      const doctorId = patient.doctors[0]._id; // Obtén el ID de un médico asociado al paciente
       const res = await chai
         .request(app)
         .delete(`/api/patients/${patient._id}/${doctorId}`);
       expect(res).to.have.status(200);
       expect(res.text).to.equal("Médico eliminado visualmente del paciente");
+
       // Verificar que el médico se haya eliminado correctamente del paciente
       const updatedPatient = await Patients.findById(patient._id);
       const doctorIndex = updatedPatient.doctors.indexOf(doctorId);
       expect(doctorIndex).to.equal(-1);
+      expect(updatedPatient.previousDoctors[0]._id).to.deep.equal(doctorId);
     });
   });
+});
 });

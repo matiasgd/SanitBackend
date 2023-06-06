@@ -129,4 +129,33 @@ describe("User Controller", () => {
       expect(res.text).to.equal("User not found");
     });
   });
+
+  describe("DELETE /users/:_id", () => {
+    it("debería devolver un mensaje de error si el ID enviado del paciente no existe", async () => {
+      const res = await chai
+        .request(app)
+        .delete(`/api/users/delete/123123123123`)
+      expect(res).to.have.status(404);
+      expect(res.text).to.equal("Doctor no encontrado");
+    });
+
+    it("debería eliminar un médico", async () => {
+      const user = new Users({
+          username: "UserForTesting",
+          email: "UserForTesting@gmail.com",
+          password: "7up2024",
+          name: "UserForTesting",
+          lastName: "UserForTesting",
+          gender: "Masculino",
+          country: "Argentina",
+        });
+      const doctor = await user.save();
+      const res = await chai
+        .request(app)
+        .delete(`/api/users/delete/${doctor._id}`);
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an("object");
+      expect(res.body._id).to.equal(doctor._id.toString());
+    });
+  });
 });
