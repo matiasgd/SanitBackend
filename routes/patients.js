@@ -4,18 +4,22 @@ const {
   getMyPatients,
   createPatient,
   removeDoctorFromPatient,
+  updatePatient,
 } = require("../controllers/patients");
 
-//-----------RUTAS GENERALES-------------//
+  //-----------RUTAS GENERALES-------------//
 
-// OBTENER MIS PACIENTES
-router.get("/:_id", getMyPatients);
+  // OBTENER MIS PACIENTES
+  router.get("/:_id", getMyPatients);
 
-// CREAR PACIENTES
-router.post("/new/:doctorId", createPatient);
+  // CREAR PACIENTES
+  router.post("/new/:doctorId", createPatient);
 
-// BORRAR UN PACIENTE
-router.delete("/:patientId/:doctorId", removeDoctorFromPatient);
+  // ACTUALIZAR UN PACIENTE
+  router.put("/:patientId", updatePatient)
+
+  // BORRAR UN PACIENTE
+  router.delete("/:patientId/:doctorId", removeDoctorFromPatient);
 
 
 

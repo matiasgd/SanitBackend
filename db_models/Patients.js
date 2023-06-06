@@ -30,9 +30,13 @@ const schema = Schema({
     autopopulate: true,
   },
   // datos de doctor
-  doctors: {
-    type: [String],
-  },
+  doctors: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "users",
+      autopopulate: true,
+    },
+  ],
   previousDoctors: [
     {
       type: Schema.Types.ObjectId,

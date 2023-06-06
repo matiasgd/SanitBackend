@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const schema = Schema({
-  patient: { type: Schema.Types.ObjectId, ref: "users", required: true },
+  patient: { type: Schema.Types.ObjectId, ref: "patients", required: true },
   doctor: { type: Schema.Types.ObjectId, ref: "users", required: true },
   date: { type: Date, required: true },
   duration: { type: Number, required: true },

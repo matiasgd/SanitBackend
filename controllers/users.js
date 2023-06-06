@@ -51,13 +51,32 @@ module.exports = {
         return res.status(404).send("User not found");
       }
       // Obtener los campos y sus nuevos valores del cuerpo de la solicitud
-      const updateFields = req.body
+      const updateFields = req.body;
       // Recorrer los campos y actualizar el objeto del usuario
       Object.keys(updateFields).forEach((field) => {
         user[field] = updateFields[field];
       });
       const updatedUser = await user.save();
       res.send(updatedUser);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // RUTAS GENERALES DE PEDIDO DELETE
+  deleteUser: async (req, res, next) => {
+    try {
+      const doctorId = req.params._id;
+      const doctor = await Users.findOne({ _id: doctorId });
+      // verificacion si el ID enviado por params no existe en la DB
+      if (!doctor) {
+        return res.status(404).send("Doctor no encontrado");
+      }
+      // eliminacion si el servicio existe
+      const removedUser = await Users.findOneAndDelete({
+        _id: doctorId,
+      });
+      res.status(200).send(removedUser);
     } catch (err) {
       next(err);
     }
