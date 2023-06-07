@@ -7,7 +7,6 @@ module.exports = {
     const { email, password } = req.body;
     try {
       const user = await Users.findOne({ email: email });
-
       if (!user) {
         return res.status(401).send("User not found in the database");
       }
@@ -25,7 +24,7 @@ module.exports = {
   },
   userLogout: (req, res) => {
     res.clearCookie("token");
-    res.status(200).send({});
+    res.status(200).send("User logged out");
   },
   userMe: (req, res) => {
     res.send(req.user);
