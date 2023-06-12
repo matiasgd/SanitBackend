@@ -6,6 +6,7 @@ const { port, port_Test, nodeENV, corsOrigin } = require("./config");
 const cors = require("cors");
 const morgan = require("morgan");
 const { mongoDBHelpers } = require("./helpers");
+const cookieParser = require("cookie-parser");
 
 // ROUTES
 const routes = require("./routes");
@@ -18,8 +19,11 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(express.json());
+
 
 // ROUTES
 app.use("/api", routes);
