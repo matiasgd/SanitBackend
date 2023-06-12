@@ -17,15 +17,15 @@ describe("User Controller", () => {
 
   describe("GET /users/:_id", () => {
     beforeEach(async () => {
-      const newUser = new Users({
-        username: "UserForTesting",
-        email: "UserForTesting@gmail.com",
-        password: "7up2024",
-        name: "UserForTesting",
-        lastName: "UserForTesting",
-        gender: "Masculino",
-        country: "Argentina",
-      });
+       const newUser = new Users({
+         username: "jrichards",
+         email: "jrichards@gmail.com",
+         password: "7up2024",
+         name: "James",
+         lastName: "Richards",
+         gender: "Masculino",
+         country: "Argentina",
+       });
       await newUser.save();
     });
 

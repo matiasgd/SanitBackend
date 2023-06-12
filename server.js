@@ -13,15 +13,13 @@ const routes = require("./routes");
 
 // MIDDLEWARES
 app.use(bodyParser.json());
-
 app.use(
   cors({
-    origin: "*",
-    //credentials: true,
+    origin: corsOrigin,
+    credentials: true,
   })
 );
 
-app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(express.json());
@@ -44,7 +42,7 @@ app.listen(port, () => {
 
 // CONNECT TO MONGODB
 (async () => {
-    await mongoDBHelpers.connect();
+  await mongoDBHelpers.connect();
 })();
 
-module.exports =  app 
+module.exports = app;
