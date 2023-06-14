@@ -18,7 +18,6 @@ describe("User Controller", () => {
   describe("GET /users/:_id", () => {
     beforeEach(async () => {
        const newUser = new Users({
-         username: "jrichards",
          email: "jrichards@gmail.com",
          password: "7up2024",
          name: "James",
@@ -62,7 +61,6 @@ describe("User Controller", () => {
 
     it("debería crear un nuevo usuario", async () => {
       const newUser = {
-        username: "UserForTesting",
         email: "UserForTesting@gmail.com",
         password: "7up2024",
         name: "UserForTesting",
@@ -74,14 +72,13 @@ describe("User Controller", () => {
       const res = await chai.request(app).post("/api/users/new").send(newUser);
       expect(res).to.have.status(200);
       expect(res.body).to.be.an("object");
-      expect(res.body.username).to.equal(newUser.username);
+      expect(res.body.name).to.equal(newUser.name);
     });
   });
 
   describe("PUT /users/update/:_id", () => {
     beforeEach(async () => {
       const newUser = new Users({
-        username: "UserForTesting",
         email: "UserForTesting@gmail.com",
         password: "7up2024",
         name: "UserForTesting",
@@ -99,7 +96,6 @@ describe("User Controller", () => {
     it("debería actualizar un usuario existente", async () => {
       const user = await Users.findOne();
       const updatedUserData = {
-        username: "UpdatedUser",
         email: "updateduser@gmail.com",
       };
 
@@ -110,7 +106,6 @@ describe("User Controller", () => {
 
       expect(res).to.have.status(200);
       expect(res.body).to.be.an("object");
-      expect(res.body.username).to.equal(updatedUserData.username);
       expect(res.body.email).to.equal(updatedUserData.email);
     });
 
@@ -141,7 +136,6 @@ describe("User Controller", () => {
 
     it("debería eliminar un médico", async () => {
       const user = new Users({
-          username: "UserForTesting",
           email: "UserForTesting@gmail.com",
           password: "7up2024",
           name: "UserForTesting",

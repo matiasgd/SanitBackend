@@ -5,18 +5,21 @@ const { secret } = require("../config");
 const { Schema } = mongoose;
 
 const schema = Schema({
-  username: { type: String, required: true, unique: true },
+  // datos obligatorios de registro
   email: { type: String, required: true, unique: true },
-  password: { type: String, unique: true },
-  name: { type: String, required: true },
-  lastName: { type: String, required: true },
-  gender: {
-    type: String,
-    enum: ["Masculino", "Femenino", "Otro"],
-  },
+  password: { type: String, required: true, unique: true },
   role: { type: String, default: "user" },
-  country: { type: String },
+  // datos de primer login y registro
+  name: { type: String },
+  lastName: { type: String },
+  gender: { type: String },
   cellphone: { type: String },
+  country: { type: String },
+  Province: { type: String },
+  city: { type: String },
+  birthdate: { type: Date },
+  field: { type: String },
+  specialty: { type: String },
 });
 
 // Hook pre-save para encriptar la contraseña antes de guardarla
