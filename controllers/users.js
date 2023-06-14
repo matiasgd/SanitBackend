@@ -43,8 +43,8 @@ createOneUser: async (req, res, next) => {
     }
     // Crear un nuevo usuario
     const newUser = new Users(req.body);
-    const savedUser = await newUser.save();
-    res.send(savedUser);
+    await newUser.save();
+    res.status(201).send("El usuario se ha creado correctamente!");
   } catch (err) {
     next(err);
   }
