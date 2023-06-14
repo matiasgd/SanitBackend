@@ -63,16 +63,10 @@ describe("User Controller", () => {
       const newUser = {
         email: "UserForTesting@gmail.com",
         password: "7up2024",
-        name: "UserForTesting",
-        lastName: "UserForTesting",
-        gender: "Masculino",
-        country: "Argentina",
       };
-
       const res = await chai.request(app).post("/api/users/new").send(newUser);
-      expect(res).to.have.status(200);
-      expect(res.body).to.be.an("object");
-      expect(res.body.name).to.equal(newUser.name);
+      expect(res).to.have.status(201);
+      expect(res.text).to.equal("El usuario se ha creado correctamente!");
     });
   });
 
