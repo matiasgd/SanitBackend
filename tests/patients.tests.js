@@ -31,34 +31,22 @@ describe("Patient Controller", () => {
         name: "Paciente 1",
         lastName: "Apellido 1",
         birthdate: new Date("1990-01-01"),
-        localId: "35808054",
+        govermentId: "35808054",
         email: "paciente1@gmail.com",
         gender: "Masculino",
         country: "Argentina",
         cellphone: "123456789",
-        street: "Calle 1",
-        streetNumber: 123,
-        floor: 2,
-        letter: "A",
-        province: "Buenos Aires",
-        neighborhood: "Barrio 1",
-        zipCode: 12345,
         doctors: [userId],
       },
       {
         name: "Paciente 2",
         lastName: "Apellido 2",
         birthdate: new Date("1995-02-02"),
-        localId: "35808055",
+        govermentId: "35808055",
         email: "paciente2@gmail.com",
         gender: "Femenino",
         country: "Argentina",
         cellphone: "987654321",
-        street: "Calle 2",
-        streetNumber: 456,
-        province: "Córdoba",
-        neighborhood: "Barrio 2",
-        zipCode: 54321,
         doctors: [userId],
       },
       // Agregar más pacientes si es necesario
@@ -85,20 +73,15 @@ describe("Patient Controller", () => {
   describe("POST api/patients/new", () => {
     it("debería crear un nuevo paciente", async () => {
     const newPatient = {
-     name: "Paciente 3",
-     lastName: "Apellido 3",
-     birthdate: new Date("1994-02-02"),
-     localId: "358080589",
-     email: "paciente3@gmail.com",
-     gender: "Femenino",
-     country: "Argentina",
-     cellphone: "987654325",
-     street: "Calle 100",
-     streetNumber: 456,
-     province: "Córdoba",
-     neighborhood: "Barrio 3",
-     zipCode: 54321,
-   };
+      name: "Paciente 3",
+      lastName: "Apellido 3",
+      birthdate: new Date("1994-02-02"),
+      govermentId: "358080589",
+      email: "paciente3@gmail.com",
+      gender: "Femenino",
+      country: "Argentina",
+      cellphone: "987654325",
+    };
 
    const doctor = await Users.findOne({})
    const doctorId = doctor._id
@@ -109,7 +92,7 @@ describe("Patient Controller", () => {
       expect(res).to.have.status(200);
       expect(res.body).to.be.an("object");
       const createdPatient = await Patients.findOne({
-        localId: newPatient.localId,
+        govermentId: newPatient.govermentId,
       });
       expect(createdPatient).to.exist;
 

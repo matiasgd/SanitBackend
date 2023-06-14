@@ -18,9 +18,9 @@ module.exports = {
   createPatient: async (req, res, next) => {
     try {
       const doctorId = req.params.doctorId;
-      const localId = req.body.localId;
+      const email = req.body.email;
 
-      let patient = await Patients.findOne({ localId });
+      let patient = await Patients.findOne({ email });
 
       if (patient) {
         // El paciente ya existe, verificamos si el médico ya está asignado
@@ -36,7 +36,6 @@ module.exports = {
         // El paciente no existe, creamos un nuevo registro
         patient = await Patients.create({ ...req.body, doctors: [doctorId] });
       }
-
       res.status(200).send(patient);
     } catch (err) {
       next(err);
