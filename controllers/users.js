@@ -29,26 +29,33 @@ module.exports = {
     }
   },
 
-createOneUser: async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-    // Verificar si el correo electrónico ya está en uso
-    const existingUser = await Users.findOne({ email });
-    if(existingUser) {
-      return res.status(400).json({ error: "El correo electrónico ya está en uso" });
+  createOneUser: async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+      // Verificar si el correo electrónico ya está en uso
+      const existingUser = await Users.findOne({ email });
+      if (existingUser) {
+        return res
+          .status(400)
+          .json({ error: "El correo electrónico ya está en uso" });
+      }
+      // Validar que se proporcionen todos los campos requeridos
+      if (!email || !password) {
+        return res
+          .status(400)
+          .json({ error: "Se deben proporcionar todos los campos requeridos" });
+      }
+      // Crear un nuevo usuario
+      const newUser = new Users(req.body);
+      await newUser.save();
+      res.status(201).send({
+        user: newUser,
+        message: "El usuario se ha creado correctamente!",
+      });
+    } catch (err) {
+      next(err);
     }
-    // Validar que se proporcionen todos los campos requeridos
-    if (!email || !password) {
-      return res.status(400).json({ error: "Se deben proporcionar todos los campos requeridos" });
-    }
-    // Crear un nuevo usuario
-    const newUser = new Users(req.body);
-    await newUser.save();
-    res.status(201).send("El usuario se ha creado correctamente!");
-  } catch (err) {
-    next(err);
-  }
-},
+  },
 
   updateUser: async (req, res, next) => {
     try {
