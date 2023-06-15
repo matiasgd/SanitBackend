@@ -66,9 +66,10 @@ describe("User Controller", () => {
       };
       const res = await chai.request(app).post("/api/users/new").send(newUser);
       expect(res).to.have.status(201);
-      expect(res.text).to.equal("El usuario se ha creado correctamente!");
+      expect(res.body.message).to.equal("El usuario se ha creado correctamente!");
     });
   });
+
 
   describe("PUT /users/update/:_id", () => {
     beforeEach(async () => {

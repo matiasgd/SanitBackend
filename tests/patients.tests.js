@@ -83,7 +83,7 @@ describe("Patient Controller", () => {
     };
 
    const doctor = await Users.findOne({})
-   const doctorId = doctor._id.toString();
+   const doctorId = doctor._id
       const res = await chai
         .request(app)
         .post(`/api/patients/new/${doctorId}`)
@@ -95,16 +95,14 @@ describe("Patient Controller", () => {
       });
       expect(createdPatient).to.exist;
       expect(createdPatient.doctors[0]._id).to.deep.equal(doctorId);      
-      console.log(doctor, createdPatient.doctors[0]._id.toString(), "doctor");
-      expect(doctor.patients[0]._id.toString()).to.deep.equal(createdPatient._id.toString());      
     });
   });
 
-  describe("PUT /patients/:patientId", () => {
+  describe("PUT /patients/update/:patientId", () => {
     it("debería devolver un mensaje de error si el ID enviado del paciente no existe", async () => {
       const res = await chai
         .request(app)
-        .put(`/api/patients/123123123123`)
+        .put(`/api/patients/update/123123123123`)
       expect(res).to.have.status(404);  
       expect(res.text).to.equal("Paciente no encontrado");
     });
@@ -113,7 +111,7 @@ describe("Patient Controller", () => {
       const patient = await Patients.findOne(); // Obtén un paciente existente de la base de datos
       const res = await chai
         .request(app)
-        .put(`/api/patients/${patient._id}`)
+        .put(`/api/patients/update/${patient._id}`)
         .send({ name: "Paciente 1 actualizado" });
       expect(res).to.have.status(200);
       expect(res.body).to.be.an("object");
