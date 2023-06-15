@@ -1,4 +1,4 @@
-const { Patients } = require("../db_models");
+const { Patients, Users } = require("../db_models");
 const mongoose = require("mongoose");
 
 module.exports = {
@@ -17,10 +17,10 @@ module.exports = {
   // RUTAS GENERALES DE PEDIDO POST
   createPatient: async (req, res, next) => {
     try {
-      const doctorId = req.params.doctorId;
+      const doctorId = req.params.doctorId.toString();
       const email = req.body.email;
-
       let patient = await Patients.findOne({ email });
+      let doctor = await Users.findOne({ _id: doctorId });
 
       if (patient) {
         // El paciente ya existe, verificamos si el médico ya está asignado
@@ -31,10 +31,14 @@ module.exports = {
           // El médico no está asignado al paciente, lo agregamos al array de médicos
           patient.doctors.push(doctorId);
           await patient.save();
+          doctor.patients.push(patient._id.toString());
+          await doctor.save();
         }
       } else {
         // El paciente no existe, creamos un nuevo registro
-        patient = await Patients.create({ ...req.body, doctors: [doctorId] });
+        patient = await Patients.create({ ...req.body, doctors: [doctorId] })
+        doctor.patients.push(patient._id.toString());
+        await doctor.save();
       }
       res.status(200).send(patient);
     } catch (err) {
@@ -42,15 +46,18 @@ module.exports = {
     }
   },
 
-
   // RUTAS GENERALES DE PEDIDO PUT
   updatePatient: async (req, res, next) => {
     try {
+
       const patientId = req.params.patientId;
       const patient = await Patients.findOne({ _id: patientId });
       // verificacion si el ID enviado por params no existe en la DB
       if(!patient){
         return res.status(404).send("Paciente no encontrado");
+      }
+      if(patient.doctors.length > 1){
+        return res.status(404).send("El paciente tiene más de un médico asignado, no se puede actualizar");
       }
       // actualizacion si el paciente existe
       const updatedPatient = await Patients.findOneAndUpdate(
@@ -63,6 +70,7 @@ module.exports = {
       next(err);
     }
   },
+  
   // RUTAS GENERALES DE PEDIDO DELETE
   removeDoctorFromPatient: async (req, res, next) => {
     try {

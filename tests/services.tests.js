@@ -13,7 +13,6 @@ describe("Service Controller", () => {
   beforeEach(async () => {
     // Crear un nuevo usuario
     const newUser = new Users({
-      username: "jrichards",
       email: "jrichards@gmail.com",
       password: "7up2024",
       name: "James",

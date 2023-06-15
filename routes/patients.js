@@ -16,7 +16,7 @@ const {
   router.post("/new/:doctorId", createPatient);
 
   // ACTUALIZAR UN PACIENTE
-  router.put("/:patientId", updatePatient)
+  router.put("/update/:patientId", updatePatient)
 
   // BORRAR UN PACIENTE
   router.delete("/:patientId/:doctorId", removeDoctorFromPatient);

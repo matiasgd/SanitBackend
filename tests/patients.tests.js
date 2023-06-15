@@ -14,7 +14,6 @@ describe("Patient Controller", () => {
   beforeEach(async () => {
     // Crear un nuevo usuario
     const newUser = new Users({
-      username: "jrichards",
       email: "jrichards@gmail.com",
       password: "7up2024",
       name: "James",
@@ -84,7 +83,7 @@ describe("Patient Controller", () => {
     };
 
    const doctor = await Users.findOne({})
-   const doctorId = doctor._id
+   const doctorId = doctor._id.toString();
       const res = await chai
         .request(app)
         .post(`/api/patients/new/${doctorId}`)
@@ -95,8 +94,9 @@ describe("Patient Controller", () => {
         govermentId: newPatient.govermentId,
       });
       expect(createdPatient).to.exist;
-
       expect(createdPatient.doctors[0]._id).to.deep.equal(doctorId);      
+      console.log(doctor, createdPatient.doctors[0]._id.toString(), "doctor");
+      expect(doctor.patients[0]._id.toString()).to.deep.equal(createdPatient._id.toString());      
     });
   });
 

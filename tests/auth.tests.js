@@ -11,7 +11,6 @@ const bcrypt = require("bcrypt");
 describe("Auth Controller", () => {
   beforeEach(async () => {
     const newUser = new Users({
-      username: "jrichards",
       email: "jrichards@gmail.com",
       password: "7up2024",
       name: "James",

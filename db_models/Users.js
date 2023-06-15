@@ -20,6 +20,21 @@ const schema = Schema({
   birthdate: { type: Date },
   field: { type: String },
   specialty: { type: String },
+  // pacientes
+  patients: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "patients",
+      autopopulate: true,
+    },
+  ],
+  previousPatients: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "patients",
+      autopopulate: true,
+    },
+  ],
 });
 
 // Hook pre-save para encriptar la contraseña antes de guardarla
