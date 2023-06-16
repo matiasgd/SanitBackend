@@ -6,13 +6,14 @@ const Addresses = require("./Addresses");
 const schema = Schema({
   email: { type: String, required: true, unique: true },
   govermentId: { type: String },
-  name: { type: String},
-  lastName: { type: String },
+  name: { type: String, required: true },
+  lastName: { type: String, required: true },
   birthdate: { type: Date },
-  gender: {type: String,},
+  gender: { type: String },
   cellphone: { type: String },
   country: { type: String },
   province: { type: String },
+  healthInsurance: { type: String },
   // datos de doctor
   doctors: [
     {
