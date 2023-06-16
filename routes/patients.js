@@ -5,22 +5,31 @@ const {
   createPatient,
   removeDoctorFromPatient,
   updatePatient,
+  bulkCreatePatients,
 } = require("../controllers/patients");
 
-  //-----------RUTAS GENERALES-------------//
+// Configuración de almacenamiento
+const multer = require("multer");
+const multerConfig = require("../helpers/multerConfig");
 
-  // OBTENER MIS PACIENTES
-  router.get("/:_id", getMyPatients);
+// Instancia de Multer con la configuración personalizada
+const upload = multer(multerConfig);
 
-  // CREAR PACIENTES
-  router.post("/new/:doctorId", createPatient);
+//-----------RUTAS GENERALES-------------//
 
-  // ACTUALIZAR UN PACIENTE
-  router.put("/update/:patientId", updatePatient)
+// OBTENER MIS PACIENTES
+router.get("/:_id", getMyPatients);
 
-  // BORRAR UN PACIENTE
-  router.delete("/:patientId/:doctorId", removeDoctorFromPatient);
+// CREAR PACIENTES
+router.post("/new/:doctorId", createPatient);
 
+// CREAR PACIENTES EN BULK
+router.post("/bulk/:doctorId", upload.single("file"), bulkCreatePatients);
 
+// ACTUALIZAR UN PACIENTE
+router.put("/update/:patientId", updatePatient);
+
+// BORRAR UN PACIENTE
+router.delete("/:patientId/:doctorId", removeDoctorFromPatient);
 
 module.exports = router;

@@ -13,6 +13,7 @@ const schema = Schema({
   cellphone: { type: String },
   country: { type: String },
   province: { type: String },
+  healthInsurance: { type: String },
   // datos de doctor
   doctors: [
     {

@@ -10,7 +10,7 @@ module.exports = {
       if (!user) {
         return res.status(401).send("User not found in the database");
       }
-
+      
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res.status(401).send("Wrong password");

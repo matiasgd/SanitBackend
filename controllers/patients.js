@@ -1,5 +1,7 @@
 const { Patients, Users } = require("../db_models");
 const mongoose = require("mongoose");
+const moment = require("moment");
+const xlsx = require("xlsx");
 
 module.exports = {
   // RUTAS GENERALES DE PEDIDO GET
@@ -36,7 +38,7 @@ module.exports = {
         }
       } else {
         // El paciente no existe, creamos un nuevo registro
-        patient = await Patients.create({ ...req.body, doctors: [doctorId] })
+        patient = await Patients.create({ ...req.body, doctors: [doctorId] });
         doctor.patients.push(patient._id.toString());
         await doctor.save();
       }
@@ -46,18 +48,98 @@ module.exports = {
     }
   },
 
+  bulkCreatePatients: async (req, res, next) => {
+    try {
+      const doctorId = req.params.doctorId.toString();
+      let doctor = await Users.findOne({ _id: doctorId });
+      const file = req.file; // Archivo recibido desde el cliente
+      const workbook = xlsx.readFile(file.path);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = xlsx.utils.sheet_to_json(worksheet);
+
+      console.log(json, "JSON")
+
+      // Mapear las claves del JSON según las columnas del archivo
+      const columnMapping = {
+        name: "name",
+        lastName: "lastName",
+        govermentId: "govermentId",
+        birthdate: "birthdate",
+        email: "email",
+        gender: "gender",
+        cellphone: "cellphone",
+        country: "country",
+        healthInsurance: "healthInsurance",
+      };
+
+      const mappedJson = json.map((row) => {
+        const mappedRow = {};
+        for (const key in row) {
+          if (columnMapping[key]) {
+            mappedRow[columnMapping[key]] = row[key];
+          }
+        }
+        return mappedRow;
+      });
+      // validar el JSON
+      for (const row of mappedJson) {
+        // Convertir la fecha al formato YYYY-MM-DD
+        if (row.birthdate) {
+          const formattedDate = moment(row.birthdate, "D/M/YYYY").format(
+            "YYYY-MM-DD"
+          );
+          if (!moment(formattedDate, "YYYY-MM-DD", true).isValid()) {
+            throw new Error(
+              "El formato de la fecha de nacimiento es inválido."
+            );
+          }
+          row.birthdate = formattedDate;
+        }
+        console.log(row)
+        // Verificar campos obligatorios
+        if (!row.name || !row.lastName || !row.email) {
+          throw new Error(
+            "Los campos obligatorios están ausentes en uno o más registros."
+          );
+        }
+        // Validar formato de fecha de nacimiento
+        if (row.birthdate && !isValidDate(row.birthdate)) {
+          throw new Error("El formato de la fecha de nacimiento es inválido.");
+        }
+        // Validar género
+        if (row.gender && !isValidGender(row.gender)) {
+          throw new Error("El género es inválido.");
+        }
+        // Validar dirección de correo electrónico
+        if (row.email && !isValidEmail(row.email)) {
+          throw new Error("La dirección de correo electrónico es inválida.");
+        }
+
+        const patient = await Patients.create({ ...row, doctors: [doctorId] });
+        doctor.patients.push(patient._id);
+        await doctor.save();
+      }
+      res.status(200).send("Los pacientes del excel se crearon correctamente");
+    } catch (err) {
+      next(err);
+    }
+  },
+
   // RUTAS GENERALES DE PEDIDO PUT
   updatePatient: async (req, res, next) => {
     try {
-
       const patientId = req.params.patientId;
       const patient = await Patients.findOne({ _id: patientId });
       // verificacion si el ID enviado por params no existe en la DB
-      if(!patient){
+      if (!patient) {
         return res.status(404).send("Paciente no encontrado");
       }
-      if(patient.doctors.length > 1){
-        return res.status(404).send("El paciente tiene más de un médico asignado, no se puede actualizar");
+      if (patient.doctors.length > 1) {
+        return res
+          .status(404)
+          .send(
+            "El paciente tiene más de un médico asignado, no se puede actualizar"
+          );
       }
       // actualizacion si el paciente existe
       const updatedPatient = await Patients.findOneAndUpdate(
@@ -70,7 +152,7 @@ module.exports = {
       next(err);
     }
   },
-  
+
   // RUTAS GENERALES DE PEDIDO DELETE
   removeDoctorFromPatient: async (req, res, next) => {
     try {
@@ -83,13 +165,12 @@ module.exports = {
       }
 
       // Busco si existe el ID del medico en el array de ObjectID de doctors
-      const doctorIndex = patient.doctors.findIndex(
-        (doctor) => {
-          return (
-            doctor._id.toString() ==
-            new mongoose.Types.ObjectId(doctorIdToRemove)._id.toString()
-          );}
-      );  
+      const doctorIndex = patient.doctors.findIndex((doctor) => {
+        return (
+          doctor._id.toString() ==
+          new mongoose.Types.ObjectId(doctorIdToRemove)._id.toString()
+        );
+      });
       // si es -1 significa que no esta asociado
       if (doctorIndex === -1) {
         return res
