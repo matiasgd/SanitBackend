@@ -1,6 +1,6 @@
-// Función para validar el formato de fecha (YYYY-MM-DD)
+// Función para validar el formato de fecha (MM/DD/YYYY)
 function isValidDate(dateString) {
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/;
   return dateRegex.test(dateString);
 }
 
@@ -15,7 +15,6 @@ function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
-
 
 module.exports = {
   isValidDate,
