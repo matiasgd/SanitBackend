@@ -29,6 +29,13 @@ const schema = Schema({
       autopopulate: true,
     },
   ],
+  services: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Servicio",
+      autopopulate: true,
+    },
+  ],
 });
 
 schema.plugin(require("mongoose-autopopulate"));

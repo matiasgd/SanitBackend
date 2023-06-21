@@ -15,7 +15,7 @@ const schema = Schema({
   gender: { type: String },
   cellphone: { type: String },
   country: { type: String },
-  Province: { type: String },
+  province: { type: String },
   city: { type: String },
   birthdate: { type: Date },
   field: { type: String },

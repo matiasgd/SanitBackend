@@ -13,19 +13,40 @@ module.exports = {
     }
   },
 
-  // RUTAS GENERALES DE PEDIDO POST
+  // CREAR UN NUEVO SERVICIO
   createService: async (req, res, next) => {
     try {
-      const newService = new Services(req.body);
-      const savedService = await newService.save();
-      res.status(200).send(savedService);
+      const doctorId = req.params.doctorId;
+      const { name, duration, type, price, category } = req.body;
+
+      // Verificar si el médico existe
+      const doctor = await Users.findOne({ _id: doctorId });
+
+      if (!doctor) {
+        return res.status(404).send("Médico no encontrado");
+      }
+
+      // Crear el nuevo servicio
+      const newService = new Services({
+        name,
+        duration,
+        type,
+        price,
+        category,
+        doctor,
+      });
+
+      // Guardar el servicio en la base de datos
+      const createdService = await newService.save();
+
+      res.status(201).json(createdService);
     } catch (err) {
       next(err);
     }
   },
 
   // RUTAS GENERALES DE PEDIDO PUT
-   updateService: async (req, res, next) => {
+  updateService: async (req, res, next) => {
     try {
       const serviceId = req.params.serviceId;
       const doctorId = req.params.doctorId;
@@ -56,17 +77,19 @@ module.exports = {
       // verificacion si el ID enviado por params no existe en la DB
       if (!doctor) {
         return res.status(404).send("Doctor no encontrado");
-      } 
+      }
       // verificacion si el ID enviado por params no existe en la DB
       const service = await Services.findOne({ _id: serviceId });
       if (!service) {
         return res.status(404).send("Servicio no encontrado");
       }
       // eliminacion si el servicio existe
-      const removedService = await Services.findOneAndDelete({ _id: serviceId });
+      const removedService = await Services.findOneAndDelete({
+        _id: serviceId,
+      });
       res.status(200).send(removedService);
     } catch (err) {
       next(err);
     }
-},
-}
+  },
+};

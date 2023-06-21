@@ -13,7 +13,7 @@ const {
 router.get("/:_id", getMyServices);
 
 // CREAR UN NUEVO SERVICO
-router.post("/new", createService);
+router.post("/new/:doctorId", createService);
 
 router.put("/update/:doctorId/:serviceId", updateService);
 

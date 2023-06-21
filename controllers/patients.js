@@ -1,4 +1,4 @@
-const { Patients, Users } = require("../db_models");
+const { Patients, Users, Services } = require("../db_models");
 const mongoose = require("mongoose");
 const moment = require("moment");
 const xlsx = require("xlsx");
@@ -103,18 +103,20 @@ module.exports = {
 
         // Validar formato de fecha de nacimiento
         if (!isValidDate(row.birthdate)) {
-         throw new Error("El formato de la fecha de nacimiento es inválido.");
-         }
+          throw new Error("El formato de la fecha de nacimiento es inválido.");
+        }
         // Validar género
         if (!isValidGender(row.gender)) {
           throw new Error("El género es inválido de uno o más registros.");
         }
         // Validar dirección de correo electrónico
         if (!isValidEmail(row.email)) {
-          throw new Error("La dirección de correo electrónico de uno o más registros es inválida.");
+          throw new Error(
+            "La dirección de correo electrónico de uno o más registros es inválida."
+          );
         }
 
-        // Creacion de los pacientes 
+        // Creacion de los pacientes
         let patient = await Patients.findOne({ email: row.email });
         if (patient) {
           // El paciente ya existe, verificamos si el médico ya está asignado
@@ -139,6 +141,40 @@ module.exports = {
         }
       }
       res.status(200).send("Los pacientes del excel se crearon correctamente");
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // ASIGNAR SERVICIO AL PACIENTE
+  assignServiceToPatient: async (req, res, next) => {
+    try {
+      const patientId = req.params.patientId;
+      const patient = await Paciente.findOne({ _id: patientId });
+
+      if (!patient) {
+        return res.status(404).send("Paciente no encontrado");
+      }
+
+      const serviceId = req.body.servicioId;
+      const service = await Servicio.findOne({ _id: serviceId });
+
+      if (!service) {
+        return res.status(404).send("Servicio no encontrado");
+      }
+
+      const medicoId = service.doctor;
+
+      if (!patient.doctors.includes(medicoId)) {
+        return res
+          .status(404)
+          .send("El médico asignado no coincide con el paciente");
+      }
+
+      patient.services.push(serviceId);
+      await patient.save();
+
+      res.status(200).send(patient);
     } catch (err) {
       next(err);
     }
