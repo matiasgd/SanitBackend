@@ -5,13 +5,9 @@ const xlsx = require("xlsx");
 const { isValidDate, isValidGender, isValidEmail } = require("../utils");
 
 module.exports = {
-  // RUTAS GENERALES DE PEDIDO GET
-  getMyPatients: async (req, res, next) => {
+  getPatients: async (req, res, next) => {
     try {
-      const doctorId = req.params._id;
-      const patients = await Patients.find({ doctor: doctorId })
-        .populate("address")
-        .populate("doctor");
+      const patients = await Patients.find();
       res.status(200).send(patients);
     } catch (err) {
       next(err);
@@ -149,20 +145,23 @@ module.exports = {
   // ASIGNAR SERVICIO AL PACIENTE
   assignServiceToPatient: async (req, res, next) => {
     try {
+      // Verificar si el paciente existe
       const patientId = req.params.patientId;
-      const patient = await Paciente.findOne({ _id: patientId });
+      const patient = await Patients.findOne({ _id: patientId });
 
       if (!patient) {
         return res.status(404).send("Paciente no encontrado");
       }
 
+      // verificar si el servicio existe
       const serviceId = req.body.servicioId;
-      const service = await Servicio.findOne({ _id: serviceId });
+      const service = await Services.findOne({ _id: serviceId });
 
       if (!service) {
         return res.status(404).send("Servicio no encontrado");
       }
 
+      // verificar si el medico asignado al servicio es el mismo que el del paciente
       const medicoId = service.doctor;
 
       if (!patient.doctors.includes(medicoId)) {

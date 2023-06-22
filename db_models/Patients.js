@@ -32,7 +32,7 @@ const schema = Schema({
   services: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Servicio",
+      ref: "services",
       autopopulate: true,
     },
   ],

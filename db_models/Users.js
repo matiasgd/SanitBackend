@@ -25,14 +25,12 @@ const schema = Schema({
     {
       type: Schema.Types.ObjectId,
       ref: "patients",
-      autopopulate: true,
     },
   ],
   previousPatients: [
     {
       type: Schema.Types.ObjectId,
       ref: "patients",
-      autopopulate: true,
     },
   ],
 });
