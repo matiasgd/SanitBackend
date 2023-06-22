@@ -9,7 +9,7 @@ describe("User Controller", () => {
   // Pruebas de pedidos GET
   describe("GET /users", () => {
     it("debería obtener todos los usuarios", async () => {
-      const res = await chai.request(app).get("/api/users");  
+      const res = await chai.request(app).get("/api/users");
       expect(res).to.have.status(200);
       expect(res.body).to.be.an("array");
     });
@@ -17,10 +17,10 @@ describe("User Controller", () => {
 
   describe("GET /users/:_id", () => {
     beforeEach(async () => {
-       const newUser = new Users({
-         email: "jrichards@gmail.com",
-         password: "7up2024",
-       });
+      const newUser = new Users({
+        email: "jrichards@gmail.com",
+        password: "7up2024",
+      });
       await newUser.save();
     });
 
@@ -62,10 +62,11 @@ describe("User Controller", () => {
       };
       const res = await chai.request(app).post("/api/users/new").send(newUser);
       expect(res).to.have.status(201);
-      expect(res.body.message).to.equal("El usuario se ha creado correctamente!");
+      expect(res.body.message).to.equal(
+        "El usuario se ha creado correctamente!"
+      );
     });
   });
-
 
   describe("PUT /users/update/:_id", () => {
     beforeEach(async () => {
@@ -120,20 +121,20 @@ describe("User Controller", () => {
     it("debería devolver un mensaje de error si el ID enviado del paciente no existe", async () => {
       const res = await chai
         .request(app)
-        .delete(`/api/users/delete/123123123123`)
+        .delete(`/api/users/delete/123123123123`);
       expect(res).to.have.status(404);
       expect(res.text).to.equal("Doctor no encontrado");
     });
 
     it("debería eliminar un médico", async () => {
       const user = new Users({
-          email: "UserForTesting@gmail.com",
-          password: "7up2024",
-          name: "UserForTesting",
-          lastName: "UserForTesting",
-          gender: "Masculino",
-          country: "Argentina",
-        });
+        email: "UserForTesting@gmail.com",
+        password: "7up2024",
+        name: "UserForTesting",
+        lastName: "UserForTesting",
+        gender: "Masculino",
+        country: "Argentina",
+      });
       const doctor = await user.save();
       const res = await chai
         .request(app)
@@ -143,7 +144,73 @@ describe("User Controller", () => {
       expect(res.body._id).to.equal(doctor._id.toString());
     });
   });
+
+  // describe("DELETE /users/delete/:patientId/:doctorId", async () => {
+  //   beforeEach(async () => {
+  //         const user = new Users({
+  //       email: "UserForTesting@gmail.com",
+  //       password: "7up2024",
+  //       name: "UserForTesting",
+  //       lastName: "UserForTesting",
+  //       gender: "Masculino",
+  //       country: "Argentina",
+  //     });
+  //     const doctor = await user.save();
+  //     const patient = new Patients({
+  //       name: "Paciente 3",
+  //       lastName: "Apellido 3",
+  //       email: "asd@gmail.com",
+  //       doctors: [doctor._id],
+  //     });
+  //     await patient.save();
+  //     });
+  //     const patientId = patient._id;
+
+
+  //   it("debería devolver un mensaje de error si el ID del medico no se encuentra asociado al paciente", async () => {
+  //     const user = await Users.findOne(); // Obtén un paciente existente de la base de datos
+  //     const patientId = user._id; // Obtén el ID de un paciente
+  //     const res = await chai
+  //       .request(app)
+  //       .delete(`/api/users/delete/${patientId}/123123123123`);
+  //     expect(res).to.have.status(404);
+  //     expect(res.text).to.equal("Médico no encontrado");
+  //   });
+
+  //   it("debería devolver un mensaje de error si el ID enviado del paciente no existe", async () => {
+  //     const user = await Users.findOne(); // Obtén un paciente existente de la base de datos
+  //     const doctorId = user.doctors[0]._id; // Obtén el ID de un médico asociado al paciente
+  //     const res = await chai
+  //       .request(app)
+  //       .delete(`/api/users/delete/123123123123/${doctorId}`);
+  //     expect(res).to.have.status(404);
+  //     expect(res.text).to.equal("Paciente no encontrado");
+  //   });
+
+  //   it("debería eliminar un médico de un paciente", async () => {
+  //     const user = await Users.findOne(); // Obtén un paciente existente de la base de datos
+  //     const patientId = user._id; // Obtén el ID de un paciente
+  //     const doctorId = user.doctors[0]._id; // Obtén el ID de un médico asociado al paciente
+  //     const res = await chai
+  //       .request(app)
+  //       .delete(`/api/users/delete/${patientId}/${doctorId}`);
+  //     expect(res).to.have.status(200);
+  //     expect(res.text).to.equal("Médico eliminado visualmente del paciente");
+
+  //     // Verificar que el médico se haya eliminado correctamente del paciente
+  //     const updatedUser = await Users.findById(patientId);
+  //     const doctorIndex = updatedUser.doctors.findIndex(
+  //       (doctor) => doctor._id.toString() === doctorId.toString()
+  //     );
+  //     expect(doctorIndex).to.equal(-1);
+  //     expect(updatedUser.previousDoctors[0]._id.toString()).to.equal(
+  //       doctorId.toString()
+  //     );
+  //   });
+  // });
 });
+
+  
 
 
 

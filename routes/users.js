@@ -7,6 +7,7 @@ const {
   createOneUser,
   updateUser,
   deleteUser,
+  removePatientFromDoctor,
 } = require("../controllers/users");
 
 //-----------RUTAS GENERALES-------------//
@@ -28,5 +29,9 @@ router.put("/update/:_id", updateUser);
 
 // ELIMINAR UN USUARIO
 router.delete("/delete/:_id", deleteUser);
+
+// BORRAR UN PACIENTE DE UN DOCTOR
+router.delete("/delete/:patientId/:doctorId", removePatientFromDoctor);
+
 
 module.exports = router;
