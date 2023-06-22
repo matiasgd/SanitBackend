@@ -3,7 +3,7 @@ const chaiHttp = require("chai-http");
 const { expect } = chai;
 chai.use(chaiHttp);
 const app = require("../server");
-const { Users } = require("../db_models");
+const { Users, Patients } = require("../db_models");
 
 describe("User Controller", () => {
   // Pruebas de pedidos GET
@@ -20,10 +20,6 @@ describe("User Controller", () => {
        const newUser = new Users({
          email: "jrichards@gmail.com",
          password: "7up2024",
-         name: "James",
-         lastName: "Richards",
-         gender: "Masculino",
-         country: "Argentina",
        });
       await newUser.save();
     });
@@ -43,14 +39,14 @@ describe("User Controller", () => {
     it("debería devolver un mensaje de error si el ID enviado no tiene el formato correcto", async () => {
       const res = await chai.request(app).get("/api/users/123456789");
       expect(res).to.have.status(404);
-      expect(res.text).to.equal("Invalid user ID");
+      expect(res.text).to.equal("el ID es invadido");
     });
 
     it("debería devolver un mensaje de error si el ID no se encuentra en la base de datos", async () => {
       const nonExistingId = "00000c5b099d75204c5ccb00"; // ID Editado para que no exista en la DB
       const res = await chai.request(app).get(`/api/users/${nonExistingId}`);
       expect(res).to.have.status(404);
-      expect(res.text).to.equal("User not found");
+      expect(res.text).to.equal("Usuario no encontrado");
     });
   });
 
@@ -148,3 +144,6 @@ describe("User Controller", () => {
     });
   });
 });
+
+
+

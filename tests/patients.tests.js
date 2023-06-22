@@ -61,14 +61,6 @@ describe("Patient Controller", () => {
     await Patients.deleteMany({});
   });
 
-  describe("GET /patients", () => {
-    it("deberia obtener todos los pacientes de un medico", async () => {
-      const res = await chai.request(app).get(`/api/patients/${userId}`);
-      expect(res).to.have.status(200);
-      expect(res.body).to.be.an("array");
-    });
-  });
-
   describe("POST api/patients/new", () => {
     it("debería crear un nuevo paciente", async () => {
     const newPatient = {

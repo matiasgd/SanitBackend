@@ -66,15 +66,15 @@ describe("Service Controller", () => {
         type: "Presencial",
         price: 1000,
         category: "Prepaga",
-        doctor: userId,
       };
+      console.log(userId, "userId");
 
       const res = await chai
         .request(app)
-        .post(`/api/services/new`)
+        .post(`/api/services/new/${userId}`)
         .send(newService3);
 
-      expect(res).to.have.status(200);
+      expect(res).to.have.status(201);
       expect(res.body).to.be.an("Object");
       expect(res.body.name).to.equal(newService3.name);
     });
