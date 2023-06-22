@@ -116,4 +116,72 @@ module.exports = {
       next(err);
     }
   },
+  // RUTAS GENERALES DE PEDIDO DELETE
+  removePatientFromDoctor: async (req, res, next) => {
+    try {
+      const patientId = req.params.patientId;
+      const doctorId = req.params.doctorId;
+
+      const doctor = await Users.findById(doctorId);
+      if (!doctor) {
+        return res.status(404).send("Médico no encontrado");
+      }
+
+      // Buscar si existe el ID del paciente en el array de ObjectID de patients del médico
+      const patientIndex = doctor.patients.findIndex((patient) => {
+        return (
+          patient._id.toString() ==
+          new mongoose.Types.ObjectId(patientId)._id.toString()
+        );
+      });
+
+      // Si es -1 significa que no está asociado
+      if (patientIndex === -1) {
+        return res
+          .status(404)
+          .send("El paciente no está asociado a este médico");
+      }
+
+      // Si está asociado, proceder a eliminar al paciente del array de patients del médico
+      const removedPatient = doctor.patients.splice(patientIndex, 1)[0];
+      await doctor.save();
+
+      const patient = await Patients.findById(patientId);
+      if (!patient) {
+        return res.status(404).send("Paciente no encontrado");
+      }
+
+      // Buscar si existe el ID del médico en el array de ObjectID de doctors del paciente
+      const doctorIndex = patient.doctors.findIndex((doctor) => {
+        return (
+          doctor._id.toString() ==
+          new mongoose.Types.ObjectId(doctorId)._id.toString()
+        );
+      });
+
+      // Si es -1 significa que no está asociado
+      if (doctorIndex === -1) {
+        return res
+          .status(404)
+          .send("El médico no está asociado a este paciente");
+      }
+
+      // Si está asociado, proceder a eliminar al médico del array de doctors del paciente
+      const removedDoctor = patient.doctors.splice(doctorIndex, 1)[0];
+      await patient.save();
+
+      // Agregar al médico al array de previousDoctors del paciente
+      patient.previousDoctors.push(removedDoctor);
+
+      // Agregar al paciente al array de previousPatients del médico
+      doctor.previousPatients.push(removedPatient);
+
+      await patient.save();
+      await doctor.save();
+
+      res.status(200).send("Paciente eliminado del médico exitosamente");
+    } catch (err) {
+      next(err);
+    }
+  },
 };

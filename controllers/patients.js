@@ -154,7 +154,7 @@ module.exports = {
       }
 
       // verificar si el servicio existe
-      const serviceId = req.body.servicioId;
+      const serviceId = req.body.serviceId;
       const service = await Services.findOne({ _id: serviceId });
 
       if (!service) {
@@ -164,7 +164,8 @@ module.exports = {
       // verificar si el medico asignado al servicio es el mismo que el del paciente
       const medicoId = service.doctor;
 
-      if (!patient.doctors.includes(medicoId)) {
+      console.log(patient.doctors, medicoId, "medicoId");
+      if (!patient.doctors.some((doctor) => doctor._id.equals(medicoId))) {
         return res
           .status(404)
           .send("El médico asignado no coincide con el paciente");
@@ -178,7 +179,42 @@ module.exports = {
       next(err);
     }
   },
+  // DESASIGNAR SERVICIO DEL PACIENTE
+  unassignServiceFromPatient: async (req, res, next) => {
+    try {
+      // Obtener el ID del paciente y el ID del servicio
+      const patientId = req.params.patientId;
+      const serviceId = req.params.serviceId;
 
+      // Verificar si el paciente existe
+      const patient = await Patients.findOne({ _id: patientId });
+      if (!patient) {
+        return res.status(404).send("Paciente no encontrado");
+      }
+
+      // Verificar si el servicio existe
+      const service = await Services.findOne({ _id: serviceId });
+      if (!service) {
+        return res.status(404).send("Servicio no encontrado");
+      }
+
+      // Verificar si el médico asignado al servicio es el mismo que el del paciente
+      const medicoId = service.doctor;
+      if (!patient.doctors.some((doctor) => doctor._id.equals(medicoId))) {
+        return res
+          .status(404)
+          .send("El médico asignado no coincide con el paciente");
+      }
+
+      // Eliminar el ID del servicio de la lista de servicios del paciente
+      patient.services.pull(serviceId);
+      await patient.save();
+
+      res.status(200).send(patient);
+    } catch (err) {
+      next(err);
+    }
+  },
   // RUTAS GENERALES DE PEDIDO PUT
   updatePatient: async (req, res, next) => {
     try {
@@ -202,40 +238,6 @@ module.exports = {
         { new: true }
       );
       res.status(200).send(updatedPatient);
-    } catch (err) {
-      next(err);
-    }
-  },
-
-  // RUTAS GENERALES DE PEDIDO DELETE
-  removeDoctorFromPatient: async (req, res, next) => {
-    try {
-      const patientId = req.params.patientId;
-      const doctorIdToRemove = req.params.doctorId;
-
-      const patient = await Patients.findById(patientId);
-      if (!patient) {
-        return res.status(404).send("Paciente no encontrado");
-      }
-
-      // Busco si existe el ID del medico en el array de ObjectID de doctors
-      const doctorIndex = patient.doctors.findIndex((doctor) => {
-        return (
-          doctor._id.toString() ==
-          new mongoose.Types.ObjectId(doctorIdToRemove)._id.toString()
-        );
-      });
-      // si es -1 significa que no esta asociado
-      if (doctorIndex === -1) {
-        return res
-          .status(404)
-          .send("El médico no está asociado a este paciente");
-      }
-      // si esta asociado procedo a mover el medico a previousDoctors
-      patient.previousDoctors.push(patient.doctors[doctorIndex]);
-      patient.doctors.splice(doctorIndex, 1);
-      await patient.save();
-      res.status(200).send("Médico eliminado visualmente del paciente");
     } catch (err) {
       next(err);
     }

@@ -6,7 +6,8 @@ const {
   removeDoctorFromPatient,
   updatePatient,
   bulkCreatePatients,
-  assignServiceToPatient
+  assignServiceToPatient,
+  unassignServiceFromPatient,
 } = require("../controllers/patients");
 
 // Configuración de almacenamiento
@@ -30,10 +31,10 @@ router.post("/bulk/:doctorId", upload.single("file"), bulkCreatePatients);
 // ASIGNAR SERVICIO AL PACIENTE
 router.put("/assign/:patientId", assignServiceToPatient);
 
+// DESASIGNAR SERVICIO AL PACIENTE
+router.put("/unassign/:patientId/:serviceId", unassignServiceFromPatient);
+
 // ACTUALIZAR UN PACIENTE
 router.put("/update/:patientId", updatePatient);
-
-// BORRAR UN PACIENTE
-router.delete("/:patientId/:doctorId", removeDoctorFromPatient);
 
 module.exports = router;

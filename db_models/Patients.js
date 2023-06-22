@@ -19,21 +19,21 @@ const schema = Schema({
     {
       type: Schema.Types.ObjectId,
       ref: "users",
-      autopopulate: true,
+      //autopopulate: true,
     },
   ],
   previousDoctors: [
     {
       type: Schema.Types.ObjectId,
       ref: "users",
-      autopopulate: true,
+      //autopopulate: true,
     },
   ],
   services: [
     {
       type: Schema.Types.ObjectId,
       ref: "services",
-      autopopulate: true,
+      //autopopulate: true,
     },
   ],
 });
