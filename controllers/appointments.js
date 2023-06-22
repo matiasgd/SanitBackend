@@ -1,7 +1,7 @@
-const { Appointments } = require("../db_models");
+const { Appointments, Users } = require("../db_models");
+const moment = require("moment");
 
 module.exports = {
-  // RUTAS GENERALES DE PEDIDO GET
   getAll: async (req, res, next) => {
     try {
       const users = await Appointments.find();
@@ -10,56 +10,95 @@ module.exports = {
       next(err);
     }
   },
-  createAppointment: async (req, res, next) => {
+  getAppointmentById: async (req, res, next) => {
     try {
-      const newAppointment = new Appointments(req.body);
-      const savedAppointment = await newAppointment.save();
-      res.send(savedAppointment);
+      const { id } = req.params;
+      const appointment = await Appointments.findById(id)
+        .populate("patient", "name email")
+        .populate("doctor", "name email");
+      if (!appointment) {
+        return res.status(404).send("El turno no existe");
+      }
+      res.send(appointment);
     } catch (err) {
       next(err);
+    }
+  },
+  createAppointment: async (req, res, next) => {
+    try {
+      const { date, timeOfAppointment, patientId, doctorId } = req.body;
+      // validaciones
+      const existingAppointment = await Appointments.findOne({
+        date,
+        timeOfAppointment,
+        doctor: doctorId,
+      });
+      // si ya existe un turno con esa fecha y hora.
+      if (existingAppointment) {
+        return res.status(400).send("El turno ya está reservado");
+      }
+
+      // si la fecha es anterior a la actual o si la fecha es igual a la actual y la hora es anterior a la actual.
+      if (
+        moment(date).isBefore(moment()) ||
+        (moment(date).isSame(moment()) &&
+          moment(timeOfAppointment, "HH:mm").isBefore(moment()))
+      ) {
+        return res
+          .status(400)
+          .send("No es posible reservar un turno en el pasado");
+      }
+      const newAppointment = new Appointments({
+        date,
+        timeOfAppointment,
+        patient: patientId,
+        doctor: doctorId,
+      });
+      console.log(newAppointment, "newAppointment");
+      await newAppointment.save();
+
+      res.status(201).send("El turno fue reservado satisfactoriamente.");
+    } catch {
+      return res
+        .status(500)
+        .send("No es posible reservar un turno en este momento");
     }
   },
   updateAppointment: async (req, res, next) => {
     try {
-      const _id = req.params._id;
-      const appointment = await Appointments.findOne({ _id });
-      if (!appointment) {
-        return res.status(404).send("Appointment not found");
-      }
+      const { appointmentId } = req.params;
+      const { date, timeOfAppointment, patientId, doctorId } = req.body;
 
-      // Obtener los campos y sus nuevos valores del cuerpo de la solicitud
-      const updateFields = req.body;
-
-      // Recorrer los campos y actualizar el objeto de la cita
-      Object.keys(updateFields).forEach((field) => {
-        appointment[field] = updateFields[field];
+      const user = await Users.find({ _id: doctorId });
+      const existingAppointment = await Appointments.findOne({
+        _id: appointmentId,
       });
 
-      const updatedAppointment = await appointment.save();
-      res.send(updatedAppointment);
-    } catch (err) {
-      next(err);
+      if (!existingAppointment) {
+        return res.status(400).send("El turno no existe");
+      }
+
+      // actualizacion si el turno existe
+      const updatedAppointment = await Appointments.findOneAndUpdate(
+        { _id: appointmentId },
+        req.body,
+        { new: true }
+      );
+      return res.status(200).send(updatedAppointment);
+    } catch (error) {
+      return res
+        .status(500)
+        .send(`Error del servidor, no se logro realizar la actualizacion`);
     }
   },
   deleteAppointment: async (req, res, next) => {
     try {
-      const appointmentId = req.params._id;
-      const userId = req.params._userId;
-      // Buscar la cita por su ID
-      const appointment = await Appointments.findById(appointmentId);
+      const { id } = req.params;
+      const appointment = await Appointments.findByIdAndDelete(id);
       if (!appointment) {
-        return res.status(404).send("Appointment not found");
+        return res.status(404).send("El turno no existe");
       }
-      if (
-        appointment.patient.toString() !== userId.toString() &&
-        appointment.doctor.toString() !== userId.toString()
-      ) {
-        return res.status(404).send("User not authorized");
-      }
-      // Eliminar la cita
-      await Appointments.deleteOne({ _id: appointmentId });
-
-      res.send("Appointment deleted successfully");
+      res.send("El turno fue eliminado satisfactoriamente.");
     } catch (err) {
       next(err);
     }

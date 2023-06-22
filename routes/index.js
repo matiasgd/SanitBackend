@@ -8,6 +8,7 @@ const services = require("./services");
 const patients = require("./patients");
 const auth = require("./auth");
 
+
 router.use("/users", users);
 router.use("/addresses", addresses);
 router.use("/appointments", appointments);
@@ -15,5 +16,7 @@ router.use("/fees", fees);
 router.use("/services", services);
 router.use("/patients", patients);
 router.use("/auth", auth);
+
+
 
 module.exports = router;
