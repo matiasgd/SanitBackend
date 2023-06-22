@@ -44,7 +44,6 @@ module.exports = {
       next(err);
     }
   },
-
   // RUTAS GENERALES DE PEDIDO PUT
   updateService: async (req, res, next) => {
     try {
