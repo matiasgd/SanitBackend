@@ -1,4 +1,4 @@
-const { Users } = require("../db_models");
+const { Users, Patients } = require("../db_models");
 const mongoose = require("mongoose");
 
 module.exports = {
@@ -11,24 +11,41 @@ module.exports = {
       next(err);
     }
   },
-
   findOneUser: async (req, res, next) => {
     try {
       const _id = req.params._id;
       // Validar el formato de _id utilizando mongoose
       if (!mongoose.isValidObjectId(_id)) {
-        return res.status(404).send("Invalid user ID");
+        return res.status(404).send("el ID es invadido");
       }
       const user = await Users.findOne({ _id });
       if (!user) {
-        return res.status(404).send("User not found");
+        return res.status(404).send("Usuario no encontrado");
       }
       res.send(user);
     } catch (err) {
       next(err);
     }
   },
+  getMyPatients: async (req, res, next) => {
+    try {
+      const doctorId = req.params.doctorId;
+      const doctor = await Users.findById(doctorId);
+      if (!doctor) {
+        return res.status(404).send("Doctor no encontrado");
+      }
 
+      const patients = doctor.patients; // array of ObjectIDs of the patients assigned to the doctor
+      console.log(patients, "patients");
+      // Fetch patient information from the database
+      const patientsInfo = await Patients.find({ _id: { $in: patients } });
+
+      console.log(patientsInfo, "patientsInfo");
+      res.status(200).send(patientsInfo);
+    } catch (err) {
+      next(err);
+    }
+  },
   createOneUser: async (req, res, next) => {
     try {
       const { email, password } = req.body;

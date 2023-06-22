@@ -1,4 +1,4 @@
-const { Services, Users } = require("../db_models");
+const { Services, Users, Patients } = require("../db_models");
 
 module.exports = {
   // RUTAS GENERALES DE PEDIDO GET
@@ -78,15 +78,23 @@ module.exports = {
       if (!doctor) {
         return res.status(404).send("Doctor no encontrado");
       }
-      // verificacion si el ID enviado por params no existe en la DB
-      const service = await Services.findOne({ _id: serviceId });
-      if (!service) {
-        return res.status(404).send("Servicio no encontrado");
-      }
+
       // eliminacion si el servicio existe
       const removedService = await Services.findOneAndDelete({
         _id: serviceId,
+        doctor: doctorId,
       });
+
+      if (!removedService) {
+        return res.status(404).send("Servicio no encontrado");
+      }
+
+      // Eliminar el servicio del array de servicios de los pacientes
+      await Patients.updateMany(
+        { doctors: doctorId },
+        { $pull: { services: serviceId } }
+      );
+
       res.status(200).send(removedService);
     } catch (err) {
       next(err);

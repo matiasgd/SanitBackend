@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getAll,
   findOneUser,
+  getMyPatients,
   createOneUser,
   updateUser,
   deleteUser,
@@ -15,6 +16,9 @@ router.get("/", getAll);
 
 // OBTENER UN USUARIO ESPECIFICO
 router.get("/:_id", findOneUser);
+
+// OBTENER TODOS LOS PACIENTES DE UN DOCTOR
+router.get("/patients/:doctorId", getMyPatients);
 
 // CREAR UN USUARIO
 router.post("/new", createOneUser);
