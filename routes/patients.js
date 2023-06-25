@@ -8,7 +8,7 @@ const {
   bulkCreatePatients,
   assignServiceToPatient,
   unassignServiceFromPatient,
-} = require("../controllers/patients");
+} = require("../controllers/patient_controller");
 
 // Configuración de almacenamiento
 const multer = require("multer");
