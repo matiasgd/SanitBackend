@@ -5,7 +5,7 @@ const {
   createService,
   updateService,
   deleteService,
-} = require("../controllers/services");
+} = require("../controllers/service_controller.js");
 
 //-----------RUTAS GENERALES-------------//
 

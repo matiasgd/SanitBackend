@@ -4,7 +4,7 @@ const {
      userLogin, 
      userLogout, 
      userMe } 
-= require("../controllers/auth");
+= require("../controllers/auth_controller");
 
 //-----------RUTAS GENERALES-------------//
 

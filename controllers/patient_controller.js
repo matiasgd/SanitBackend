@@ -1,8 +1,9 @@
 const { Patients, Users, Services } = require("../db_models");
-const mongoose = require("mongoose");
 const moment = require("moment");
 const xlsx = require("xlsx");
 const { isValidDate, isValidGender, isValidEmail } = require("../utils");
+const PatientsService = require("../services/patient_services");
+
 
 module.exports = {
   getPatients: async (req, res, next) => {

@@ -3,12 +3,12 @@ const router = express.Router();
 const {
   getAll,
   findOneUser,
-  getMyPatients,
-  createOneUser,
+  findDoctorPatients,
+  register,
   updateUser,
   deleteUser,
   removePatientFromDoctor,
-} = require("../controllers/users");
+} = require("../controllers/user_controller");
 
 //-----------RUTAS GENERALES-------------//
 
@@ -19,10 +19,10 @@ router.get("/", getAll);
 router.get("/:_id", findOneUser);
 
 // OBTENER TODOS LOS PACIENTES DE UN DOCTOR
-router.get("/patients/:doctorId", getMyPatients);
+router.get("/patients/:doctorId", findDoctorPatients);
 
 // CREAR UN USUARIO
-router.post("/new", createOneUser);
+router.post("/new", register);
 
 // MODIFICAR UN USUARIO
 router.put("/update/:_id", updateUser);

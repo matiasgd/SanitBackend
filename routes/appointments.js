@@ -6,7 +6,7 @@ const {
   getAppointmentById,
   updateAppointment,
   deleteAppointment,
-} = require("../controllers/appointments");
+} = require("../controllers/appointment_controller");
 
 //-----------RUTAS GENERALES-------------//
 
