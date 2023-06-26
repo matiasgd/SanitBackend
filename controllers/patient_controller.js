@@ -15,37 +15,24 @@ module.exports = {
     }
   },
   // RUTAS GENERALES DE PEDIDO POST
+
   createPatient: async (req, res, next) => {
     try {
-      const doctorId = req.params.doctorId.toString();
-      const email = req.body.email;
-      let patient = await Patients.findOne({ email });
-      let doctor = await Users.findOne({ _id: doctorId });
-
-      if (patient) {
-        // El paciente ya existe, verificamos si el médico ya está asignado
-        const isDoctorAssigned = patient.doctors.some((docId) =>
-          docId.equals(doctorId)
-        );
-        if (!isDoctorAssigned) {
-          // El médico no está asignado al paciente, lo agregamos al array de médicos
-          patient.doctors.push(doctorId);
-          await patient.save();
-          doctor.patients.push(patient._id.toString());
-          await doctor.save();
-        }
-      } else {
-        // El paciente no existe, creamos un nuevo registro
-        patient = await Patients.create({ ...req.body, doctors: [doctorId] });
-        doctor.patients.push(patient._id.toString());
-        await doctor.save();
+      const doctorId = req.params.doctorId
+      const patientDTO = { ...req.body };
+      // Crear un nuevo usuario
+      const newPatient = await PatientsService.createPatient(
+        doctorId,
+        patientDTO
+      );
+      if (newPatient.error) {
+        return res.status(400).send(newPatient.message);
       }
-      res.status(200).send(patient);
-    } catch (err) {
+      res.status(200).send(newPatient.data);
+     } catch (err) {
       next(err);
     }
   },
-
   bulkCreatePatients: async (req, res, next) => {
     try {
       const doctorId = req.params.doctorId.toString();
@@ -78,8 +65,6 @@ module.exports = {
         }
         return mappedRow;
       });
-      console.log(mappedJson, "MAPPED JSON");
-
       // validar el JSON
       for (const row of mappedJson) {
         // Convertir la fecha al formato YYYY-MM-DD
