@@ -57,18 +57,20 @@ module.exports = {
     } catch (err) {
       next(err);
     }
-  },
+  },  
   register: async (req, res, next) => {
     try {
       const userDTO = { ...req.body };
-      // Crear un nuevo usuario
       const newUser = await UserService.userRegister(userDTO);
-      !newUser.error
-        ? res.status(201).send({
-            user: newUser.data,
-            message: "El usuario se ha creado correctamente!",
-          })
-        : res.status(400).send(newUser.message);
+      if (newUser.error) {
+        return res
+        .status(400)
+        .send(newUser.message);
+      }
+      res.status(201).send({
+        user: newUser.data,
+        message: "El usuario fue creado correctamente!",
+      });
     } catch (err) {
       next(err);
     }
