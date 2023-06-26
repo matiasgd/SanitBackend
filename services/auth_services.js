@@ -12,16 +12,20 @@ module.exports = class AuthService {
           error: true, 
           message: "Faltan campos obligatorios" }
       }
+      // buscar el usuario en la base de datos
       const user = await Users.findOne({ email: email });
       if (!user) {
-        return { status: 401, message: 'User not found in the database' };
+          return {
+            error: true,
+            message: "credenciales incorrectas",
+          };
       }
       // comparar la contraseña proporcionada con la contraseña almacenada en la base de datos
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return { 
            error: true, 
-           message: "El password es incorrecto." 
+           message: "credenciales incorrectas" 
           }
         }
       // Crear el token

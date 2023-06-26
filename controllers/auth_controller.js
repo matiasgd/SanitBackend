@@ -8,11 +8,15 @@ module.exports = {
     try {
       const authDTO = { ...req.body };
       const response = await AuthService.userLogin(authDTO);
-      if (!response.error) {        
-        res.status(201).cookie("token", response.data.token).send(response.data.payload);
-        } else {
-        res.status(401).send(response.message);
+      if (response.error) {
+        return res
+        .status(401)
+        .send(response.message);
       }
+      res
+        .status(201)
+        .cookie("token", response.data.token)
+        .send(response.data.payload);
     } catch (error) {
       next(error);
     }
