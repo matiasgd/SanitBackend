@@ -3,7 +3,6 @@ const router = express.Router();
 const {
   getPatients,
   createPatient,
-  removeDoctorFromPatient,
   updatePatient,
   bulkCreatePatients,
   assignServiceToPatient,

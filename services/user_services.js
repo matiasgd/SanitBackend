@@ -54,28 +54,34 @@ module.exports = class UsersService {
   }
   static async userRegister(userDTO) {
     try {
-      console.log(userDTO, "userDTO");
       const { email, password } = userDTO;
       // Validar que se proporcionen todos los campos requeridos
       if (!email || !password) {
         return {
           error: true,
           message:
-            "La informacion de los campos para la creacion de una cuenta son incorrectos.",
+            "La información de los campos para la creación de una cuenta es incorrecta.",
         };
       }
       // Validar que el email no esté registrado
       const user = await Users.findOne({ email });
       if (user) {
-        return { error: true, message: "El email ya está registrado." };
+        return {
+          error: true,
+          message: "El email ya está registrado.",
+        };
       }
+
       // Crear el usuario
-      const newUser = await Users.create(userDTO);
-      return { error: false, data: newUser };
+      const newUser = await Users.create({ email, password });
+      return {
+        error: false,
+        data: newUser,
+      };
     } catch (error) {
       return {
         error: true,
-        message: "Hubo un problema en la creacion del usuario.",
+        message: "Hubo un problema en la creación del usuario.",
       };
     }
   }
