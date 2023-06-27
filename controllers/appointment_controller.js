@@ -1,104 +1,98 @@
 const { Appointments, Users } = require("../db_models");
+const AppointmentsService = require("../services/appointment_services");
 const moment = require("moment");
 
 module.exports = {
-  getAll: async (req, res, next) => {
+  getAppointmentById: async (req, res, next) => {
     try {
-      const users = await Appointments.find();
-      res.send(users);
+      const { id } = req.params;
+      const appointment = await AppointmentsService.findById(id)
+        .populate("patient", "name email")
+        .populate("doctor", "name email");
+      if (appointment.error) {
+        return res.status(400).send(appointment.message);
+      }
+      res.status(201).send({
+        appointment: appointment.data,
+        message: "El turno fue encontrado exitosamente",
+      });
     } catch (err) {
       next(err);
     }
   },
-  getAppointmentById: async (req, res, next) => {
+  getAppointmentByDoctorId: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const appointment = await Appointments.findById(id)
-        .populate("patient", "name email")
-        .populate("doctor", "name email");
-      if (!appointment) {
-        return res.status(404).send("El turno no existe");
+      const appointments = await AppointmentsService.getAppointmentByDoctorId(
+        id
+      );
+
+      if (appointments.error) {
+        return res.status(400).send(appointments.message);
       }
-      res.send(appointment);
+      console.log(appointments.data, "appointments");
+      res.status(201).send({
+        appointments: appointments.data,
+        message: appointments.message,
+      });
     } catch (err) {
       next(err);
     }
   },
   createAppointment: async (req, res, next) => {
     try {
-      const { date, timeOfAppointment, patientId, doctorId } = req.body;
-      // validaciones
-      const existingAppointment = await Appointments.findOne({
-        date,
-        timeOfAppointment,
-        doctor: doctorId,
-      });
-      // si ya existe un turno con esa fecha y hora.
-      if (existingAppointment) {
-        return res.status(400).send("El turno ya está reservado");
-      }
+      const appointmentDTO = { ...req.body };
 
-      // si la fecha es anterior a la actual o si la fecha es igual a la actual y la hora es anterior a la actual.
-      if (
-        moment(date).isBefore(moment()) ||
-        (moment(date).isSame(moment()) &&
-          moment(timeOfAppointment, "HH:mm").isBefore(moment()))
-      ) {
-        return res
-          .status(400)
-          .send("No es posible reservar un turno en el pasado");
+      const newAppointment = await AppointmentsService.createAppointment(
+        appointmentDTO
+      );
+      if (newAppointment.error) {
+        return res.status(400).send(newAppointment.message);
       }
-      const newAppointment = new Appointments({
-        date,
-        timeOfAppointment,
-        patient: patientId,
-        doctor: doctorId,
+      res.status(201).send({
+        appointment: newAppointment.data,
+        message: newAppointment.message,
       });
-      console.log(newAppointment, "newAppointment");
-      await newAppointment.save();
-
-      res.status(201).send("El turno fue reservado satisfactoriamente.");
     } catch {
-      return res
-        .status(500)
-        .send("No es posible reservar un turno en este momento");
+      next(err);
     }
   },
   updateAppointment: async (req, res, next) => {
     try {
-      const { appointmentId } = req.params;
-      const { date, timeOfAppointment, patientId, doctorId } = req.body;
-
-      const user = await Users.find({ _id: doctorId });
-      const existingAppointment = await Appointments.findOne({
-        _id: appointmentId,
-      });
-
-      if (!existingAppointment) {
-        return res.status(400).send("El turno no existe");
+      const appointmentId = req.params.appointmentId;
+      const appointmentDTO = { ...req.body };
+      const updatedAppointment = await AppointmentsService.updateAppointment(
+        appointmentId,
+        appointmentDTO
+      )
+      if (updatedAppointment.error) {
+        return res
+        .status(400)
+        .send(updatedAppointment.message);
       }
-
-      // actualizacion si el turno existe
-      const updatedAppointment = await Appointments.findOneAndUpdate(
-        { _id: appointmentId },
-        req.body,
-        { new: true }
-      );
-      return res.status(200).send(updatedAppointment);
-    } catch (error) {
-      return res
-        .status(500)
-        .send(`Error del servidor, no se logro realizar la actualizacion`);
+      res.status(201).send({
+        appointment: updatedAppointment.data,
+        message: updatedAppointment.message,
+      });
+    } catch (err) {
+      next(err);
     }
   },
   deleteAppointment: async (req, res, next) => {
     try {
-      const { id } = req.params;
-      const appointment = await Appointments.findByIdAndDelete(id);
-      if (!appointment) {
-        return res.status(404).send("El turno no existe");
+      const appointmentId = req.params.appointmentId;
+      const deletedAppointment = await AppointmentsService.deleteAppointment(
+        appointmentId
+      )
+      if (deletedAppointment.error) {
+        return res
+        .status(400)
+        .send(deletedAppointment.message);
       }
-      res.send("El turno fue eliminado satisfactoriamente.");
+      res.status(201).send({
+        appointment: deletedAppointment.data,
+        message: deletedAppointment.message,
+      })
     } catch (err) {
       next(err);
     }

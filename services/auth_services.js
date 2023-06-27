@@ -17,7 +17,7 @@ module.exports = class AuthService {
       if (!user) {
           return {
             error: true,
-            message: "credenciales incorrectas",
+            message: "Credenciales incorrectas",
           };
       }
       // comparar la contraseña proporcionada con la contraseña almacenada en la base de datos
@@ -25,7 +25,7 @@ module.exports = class AuthService {
       if (!isMatch) {
         return { 
            error: true, 
-           message: "credenciales incorrectas" 
+           message: "Credenciales incorrectas" 
           }
         }
       // Crear el token

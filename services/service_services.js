@@ -1,5 +1,4 @@
 const { Users, Services, Patients } = require("../db_models");
-const mongoose = require("mongoose");
 
 const validTypes = ["Presencial", "Virtual", "Ambos"];
 const validCategories = ["Particular", "Prepaga", "Obra social", "Otro"];
