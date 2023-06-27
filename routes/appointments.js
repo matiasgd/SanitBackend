@@ -1,28 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const {
-  getAll,
-  createAppointment,
   getAppointmentById,
+  getAppointmentByDoctorId,
+  createAppointment,
   updateAppointment,
   deleteAppointment,
 } = require("../controllers/appointment_controller");
 
 //-----------RUTAS GENERALES-------------//
 
-// BUSCAR TODOS LOS APPOINTMENTS
-router.get("/", getAll);
-
-// BUSCAR APPOINTMENT POR ID
+// BUSCAR APPOINTMENT POR ID  
 router.get("/:_id", getAppointmentById);
+
+// BUSCAR APPOINTMENTS POR ID DE DOCTOR
+router.get("/doctor/:_id", getAppointmentByDoctorId);
 
 // CREAR UN APPOINTMENT
 router.post("/new", createAppointment);
 
 // MODIFICAR UN APPOINTMENT
-router.put("/update/:_id", updateAppointment);
+router.put("/update/:appointmentId", updateAppointment);
 
 // BORRAR UN APPOINTMENT
-router.delete("/delete/:_id", deleteAppointment);
+router.delete("/delete/:appointmentId", deleteAppointment);
 
 module.exports = router;
