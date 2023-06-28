@@ -1,6 +1,7 @@
 const { Users, Patients } = require("../db_models");
 const UserService = require("../services/user_services");
 const PatientsService = require("../services/patient_services");
+const emailService = require("../services/auth_services");
 
 module.exports = {
   getAll: async (req, res, next) => {
@@ -52,20 +53,19 @@ module.exports = {
           })
         : res.status(201).send({
             patientsInfo: result.data,
-            message:"Los datos de los pacientes se han encontrado satisfactoriamente!"
+            message:
+              "Los datos de los pacientes se han encontrado satisfactoriamente!",
           });
     } catch (err) {
       next(err);
     }
-  },  
+  },
   register: async (req, res, next) => {
     try {
       const userDTO = { ...req.body };
       const newUser = await UserService.userRegister(userDTO);
       if (newUser.error) {
-        return res
-        .status(400)
-        .send(newUser.message);
+        return res.status(400).send(newUser.message);
       }
       res.status(201).send({
         user: newUser.data,
