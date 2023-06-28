@@ -6,4 +6,6 @@ module.exports = {
   mongoTestURI: process.env.MONGO_URI_TEST,
   corsOrigin: process.env.CORS_ORIGIN,
   secret: process.env.SECRETO,
+  email: process.env.EMAIL,
+  password: process.env.EMAIL_PASSWORD,
 };
