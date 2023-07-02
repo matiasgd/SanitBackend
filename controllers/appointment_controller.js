@@ -1,5 +1,7 @@
-const { Appointments, Users } = require("../db_models");
+const { Appointments, Users, MonthlyMetrics } = require("../db_models");
 const AppointmentsService = require("../services/appointment_services");
+const MonthlyMetricsService = require("../services/monthlyMetrics_services");
+const DailyMetricsService = require("../services/dailyMetrics_services");
 const moment = require("moment");
 
 module.exports = {
@@ -70,6 +72,66 @@ module.exports = {
         .status(400)
         .send(updatedAppointment.message);
       }
+      res.status(201).send({
+        appointment: updatedAppointment.data,
+        message: updatedAppointment.message,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  confirmAppointment: async (req, res, next) => {
+    try {
+      const appointmentId = req.params.appointmentId;
+      const appointmentDTO = { ...req.body };
+      // Actualiza la cita
+      const updatedAppointment = await AppointmentsService.updateAppointment(
+        appointmentId,
+        appointmentDTO
+      );  
+      if (updatedAppointment.error) {
+        return res.status(400).send(updatedAppointment.message);
+      }  
+
+      // Actualiza los modelos de métricas mensuales y diarias
+      const currentDate = new Date();
+      const month = currentDate.getMonth() + 1
+      const year = currentDate.getFullYear();
+  
+      // Actualiza el modelo de métricas mensuales
+
+      const updatedMonthlyMetrics = await MonthlyMetricsService.updateMonthlyMetrics(
+        appointmentDTO.address,        
+        appointmentDTO.doctor,
+        month,
+        year,
+        appointmentDTO.fees
+      );
+
+      const updateDailyMetrics = await DailyMetricsService.updateDailyMetrics(
+        appointmentDTO.address,        
+        appointmentDTO.doctor,
+        currentDate.toDateString(),
+        appointmentDTO.fees
+      );
+
+
+
+      // Actualiza el modelo de métricas diarias
+      // await DailyMetrics.findOneAndUpdate(
+      //   {
+      //     doctor: appointmentDTO.doctor,
+      //     fecha: currentDate.toDateString(),
+      //   },
+      //   {
+      //     $inc: {
+      //       appointments: 1,
+      //       fees: appointmentDTO.fees,
+      //     },
+      //   },
+      //   { upsert: true }
+      // );
+  
       res.status(201).send({
         appointment: updatedAppointment.data,
         message: updatedAppointment.message,

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const schema = Schema({
-  idUser: { type: Schema.Types.ObjectId, ref: "users" },
+  doctor: { type: Schema.Types.ObjectId, ref: "users" },
   street: { type: String, required: true },
   streetNumber: { type: Number, required: true },
   floor: { type: Number },

@@ -8,7 +8,7 @@ const schema = Schema({
   // datos obligatorios de registro
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  passwordResetToken: {type: String, default: null},
+  passwordResetToken: { type: String, default: null },
   role: { type: String, default: "user" },
   // datos de primer login y registro
   name: { type: String },
@@ -33,6 +33,14 @@ const schema = Schema({
     {
       type: Schema.Types.ObjectId,
       ref: "patients",
+      //autopopulate: true,
+    },
+  ],
+  // consultorios
+  Addresses: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "addresses",
       //autopopulate: true,
     },
   ],
