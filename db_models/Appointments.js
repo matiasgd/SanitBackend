@@ -16,6 +16,8 @@ const schema = Schema({
   // users and patients
   patient: { type: Schema.Types.ObjectId, ref: "patients", required: true },
   doctor: { type: Schema.Types.ObjectId, ref: "users", required: true },
+  // services
+  service: { type: Schema.Types.ObjectId, ref: "services", required: true },
 });
 
 schema.plugin(require("mongoose-autopopulate"));

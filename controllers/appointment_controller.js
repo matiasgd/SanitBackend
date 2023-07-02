@@ -55,7 +55,7 @@ module.exports = {
         appointment: newAppointment.data,
         message: newAppointment.message,
       });
-    } catch {
+    } catch(err) {
       next(err);
     }
   },
@@ -107,33 +107,21 @@ module.exports = {
         year,
         appointmentDTO.fees
       );
-
       const updateDailyMetrics = await DailyMetricsService.updateDailyMetrics(
         appointmentDTO.address,        
         appointmentDTO.doctor,
         currentDate.toDateString(),
-        appointmentDTO.fees
-      );
+        appointmentDTO.fees);
 
-
-
-      // Actualiza el modelo de métricas diarias
-      // await DailyMetrics.findOneAndUpdate(
-      //   {
-      //     doctor: appointmentDTO.doctor,
-      //     fecha: currentDate.toDateString(),
-      //   },
-      //   {
-      //     $inc: {
-      //       appointments: 1,
-      //       fees: appointmentDTO.fees,
-      //     },
-      //   },
-      //   { upsert: true }
-      // );
-  
+      if (updatedMonthlyMetrics.error || updateDailyMetrics.error) {
+        return res
+        .status(400)
+        .send(updatedMonthlyMetrics.message || updateDailyMetrics.message);
+      }
       res.status(201).send({
         appointment: updatedAppointment.data,
+        MonthlyMetrics: updatedMonthlyMetrics.data,
+        DailyMetrics: updateDailyMetrics.data,
         message: updatedAppointment.message,
       });
     } catch (err) {
