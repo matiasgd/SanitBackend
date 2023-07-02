@@ -249,9 +249,7 @@ module.exports = class PatientService {
   static async updatePatient(patientId, patientDTO) {
     try {
       const patient = await Patients.findOne({ _id: patientId });
-      console.log(patient, "patient");
       // verificacion si el ID enviado por params no existe en la DB
-
       if (!patient) {
         return {
           error: true,

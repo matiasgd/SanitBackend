@@ -1,4 +1,4 @@
-const { MonthlyMetric } = require("../db_models");
+const { MonthlyMetric, Appointments, Services } = require("../db_models");
 
 
 module.exports = class MonthlyMetricsService {
@@ -20,15 +20,26 @@ module.exports = class MonthlyMetricsService {
       return { error: true, data: error };
     }
   }
-  static async updateMonthlyMetrics(addressId, doctorId, month, year, fees) {
-    try {
-      
+  static async updateMonthlyMetrics(appointmentId, month, year) {    
+    try {      
+      const appointment = await Appointments.findById(appointmentId);
+      if (!appointment) {
+        return {
+          error: true,
+          message: "La cita no existe", 
+        };
+      }
+      const { doctor, address } = appointment;
+      const serviceId = appointment.service
+      const service = await Services.findById(serviceId);
+
       const updatedMonthlyMetrics = await MonthlyMetric.findOneAndUpdate(
         {
-          address: addressId,
-          doctor: doctorId,
+          address: address,
+          doctor: doctor,
           month: month,
           year: year,
+          fees: service.fee,
         },
         {
           $inc: {

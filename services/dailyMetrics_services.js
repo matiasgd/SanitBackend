@@ -1,27 +1,63 @@
-const { DailyMetric } = require("../db_models");
-
+const { DailyMetric, Appointments, Services } = require("../db_models");
 
 module.exports = class MonthlyMetricsService {
   static async findDailyMetrics(doctorId, addressId, fees) {
     try {
-      const dailyMetrics = await DailyMetric.findOneAndUpdate({
-        address: addressId,
-        doctor: doctorId,
-      },
-      {
-        $inc: {
-          appointments: 1,
-          fees: fees,
+      const dailyMetrics = await DailyMetric.findOneAndUpdate(
+        {
+          address: addressId,
+          doctor: doctorId,
         },
-      },
-      { upsert: true });
-      return { error: false, data: dailyMetrics};
+        {
+          $inc: {
+            appointments: 1,
+            fees: fees,
+          },
+        },
+        { upsert: true }
+      );
+      return { error: false, data: dailyMetrics };
     } catch (error) {
       return { error: true, data: error };
     }
   }
-}
+  static async updateDailyMetrics(appointmentId, date) {
+    try {
+      const appointment = await Appointments.findById(appointmentId);
+      if (!appointment) {
+        return {
+          error: true,
+          message: "La cita no existe",
+        };
+      }
+      const { doctor, address } = appointment;
+      const serviceId = appointment.service;
+      const service = await Services.findById(serviceId);
 
-
-   
-     
+      const updatedDailyMetrics = await DailyMetric.findOneAndUpdate(
+        {
+          address: address,
+          doctor: doctor,
+          date: date,
+          fees: service.fee,
+        },
+        {
+          $inc: {
+            appointments: 1,
+            fees: fees,
+          },
+        },
+        { upsert: true }
+      );
+      return {
+        error: false,
+        data: updatedDailyMetrics,
+      };
+    } catch (error) {
+      return {
+        error: true,
+        data: error,
+      };
+    }
+  }
+};

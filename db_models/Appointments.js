@@ -13,10 +13,10 @@ const schema = Schema({
   },
   cancelReason: { type: String, default: null },
   createdAt: { type: Date, default: Date.now() },
-  // users and patients
+  // relacion con otras colecciones
   patient: { type: Schema.Types.ObjectId, ref: "patients", required: true },
   doctor: { type: Schema.Types.ObjectId, ref: "users", required: true },
-  // services
+  address: { type: Schema.Types.ObjectId, ref: "addresses", required: true },
   service: { type: Schema.Types.ObjectId, ref: "services", required: true },
 });
 

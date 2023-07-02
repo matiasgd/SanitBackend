@@ -83,11 +83,14 @@ module.exports = {
   confirmAppointment: async (req, res, next) => {
     try {
       const appointmentId = req.params.appointmentId;
+      console.log(appointmentId, "appointmentId");
+       
       const appointmentDTO = { ...req.body };
+      
       // Actualiza la cita
       const updatedAppointment = await AppointmentsService.updateAppointment(
         appointmentId,
-        appointmentDTO
+        appointmentDTO.status
       );  
       if (updatedAppointment.error) {
         return res.status(400).send(updatedAppointment.message);
@@ -99,20 +102,17 @@ module.exports = {
       const year = currentDate.getFullYear();
   
       // Actualiza el modelo de métricas mensuales
-
       const updatedMonthlyMetrics = await MonthlyMetricsService.updateMonthlyMetrics(
-        appointmentDTO.address,        
-        appointmentDTO.doctor,
+        appointmentId,
         month,
         year,
-        appointmentDTO.fees
       );
-      const updateDailyMetrics = await DailyMetricsService.updateDailyMetrics(
-        appointmentDTO.address,        
-        appointmentDTO.doctor,
-        currentDate.toDateString(),
-        appointmentDTO.fees);
 
+      // Actualiza el modelo de métricas diarias
+      const updateDailyMetrics = await DailyMetricsService.updateDailyMetrics(
+        appointmentId,
+        currentDate.toDateString(),
+      );
       if (updatedMonthlyMetrics.error || updateDailyMetrics.error) {
         return res
         .status(400)
@@ -124,10 +124,11 @@ module.exports = {
         DailyMetrics: updateDailyMetrics.data,
         message: updatedAppointment.message,
       });
-    } catch (err) {
+    }
+    catch (err) {
       next(err);
     }
-  },
+  },    
   deleteAppointment: async (req, res, next) => {
     try {
       const appointmentId = req.params.appointmentId;

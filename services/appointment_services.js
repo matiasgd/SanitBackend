@@ -124,7 +124,6 @@ module.exports = class AppointmentsService {
     try {
       // validar si el turno existe
       const existingAppointment = await Appointments.findById(appointmentId);
-      console.log(existingAppointment, "existingAppointment");
       if (!existingAppointment) {
         return {
           error: true,
