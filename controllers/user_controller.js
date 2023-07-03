@@ -1,6 +1,5 @@
 const { Users, Patients } = require("../db_models");
 const UserService = require("../services/user_services");
-const PatientsService = require("../services/patient_services");
 const emailService = require("../services/auth_services");
 
 module.exports = {

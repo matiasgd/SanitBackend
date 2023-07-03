@@ -60,7 +60,6 @@ module.exports = class PatientService {
         }
         return { error: true, message: "El paciente ya existe" };
       } else {
-        console.log("entro al else");
         // El paciente no existe, creamos un nuevo registro
         patient = await Patients.create({ ...patientDTO, doctors: [id] });
         doctor.patients.push(patient._id.toString());

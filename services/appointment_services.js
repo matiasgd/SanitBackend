@@ -122,6 +122,12 @@ module.exports = class AppointmentsService {
   }
   static async updateAppointment(appointmentId, appointmentDTO) {
     try {
+      // validar objectId
+      if (!mongoose.isValidObjectId(appointmentId)) {
+        return { 
+        error: true, 
+        message: "El ID es inválido" };
+      }
       // validar si el turno existe
       const existingAppointment = await Appointments.findById(appointmentId);
       if (!existingAppointment) {

@@ -39,16 +39,16 @@ module.exports = class MonthlyMetricsService {
           address: address,
           doctor: doctor,
           date: date,
-          fees: service.fee,
         },
         {
           $inc: {
             appointments: 1,
-            fees: fees,
+            fees: service.price,
           },
         },
         { upsert: true }
       );
+      console.log(updatedDailyMetrics, "updatedDailyMetrics...")
       return {
         error: false,
         data: updatedDailyMetrics,

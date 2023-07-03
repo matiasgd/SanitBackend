@@ -1,5 +1,4 @@
 const { Users, Services, Patients } = require("../db_models");
-
 const validTypes = ["Presencial", "Virtual", "Ambos"];
 const validCategories = ["Particular", "Prepaga", "Obra social", "Otro"];
 

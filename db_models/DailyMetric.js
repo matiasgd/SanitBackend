@@ -9,20 +9,20 @@ const schema = Schema({
   },
   doctor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'users',
-    required: true
+    ref: "users",
+    required: true,
   },
-  fecha: {
+  date: {
     type: Date,
-    required: true
+    required: true,
   },
   appointments: {
     type: Number,
-    required: true
+    required: true,
   },
   fees: {
     type: Number,
-    required: true
+    required: true,
   },
 });
 

@@ -37,11 +37,10 @@ const schema = Schema({
     },
   ],
   // consultorios
-  Addresses: [
+  addresses: [
     {
       type: Schema.Types.ObjectId,
       ref: "addresses",
-      //autopopulate: true,
     },
   ],
 });
