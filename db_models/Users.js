@@ -13,14 +13,19 @@ const schema = Schema({
   // datos de primer login y registro
   name: { type: String },
   lastName: { type: String },
+  identityType: { type: String },
+  identityNumber: { type: Number },
+  birthdate: { type: Date },
   gender: { type: String },
   cellphone: { type: String },
   country: { type: String },
   province: { type: String },
   city: { type: String },
-  birthdate: { type: Date },
   field: { type: String },
   specialty: { type: String },
+  medicalRegistration: { type: Number }, 
+  // perfil completo booleano
+  profileCompleted: { type: Boolean, default: false },
   // pacientes
   patients: [
     {

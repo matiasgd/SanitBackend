@@ -74,6 +74,30 @@ module.exports = {
       next(err);
     }
   },
+  completeRegister: async (req, res, next) => {
+    try {
+      const userDTO = { ...req.body };
+      const id = req.params.doctorId;      
+      const completeProfile = await UserService.completeRegister(
+        id,
+        userDTO
+      );
+      if (completeProfile.error) {
+        return res
+        .status(400)
+        .send({
+          user: completeProfile.data,
+          message:completeProfile.message
+        });
+      }
+      res.status(201).send({
+        user: completeProfile.data,
+        message: "El usuario fue creado correctamente!",
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
   updateUser: async (req, res, next) => {
     try {
       const userDTO = { ...req.body };

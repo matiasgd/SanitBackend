@@ -5,6 +5,7 @@ const {
   findOneUser,
   findDoctorPatients,
   register,
+  completeRegister,
   updateUser,
   deleteUser,
   removePatientFromDoctor,
@@ -23,6 +24,9 @@ router.get("/patients/:doctorId", findDoctorPatients);
 
 // CREAR UN USUARIO
 router.post("/new", register);
+
+// COMPLETANDO EL REGISTRO DE UN USUARIO
+router.post("/complete/:doctorId", completeRegister);
 
 // MODIFICAR UN USUARIO
 router.put("/update/:_id", updateUser);

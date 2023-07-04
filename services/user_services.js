@@ -2,7 +2,6 @@ const { Users, Patients } = require("../db_models");
 const mongoose = require("mongoose");
 const { checkIdFormat } = require("../utils");
 
-
 module.exports = class UsersService {
   static async findUsers() {
     try {
@@ -17,7 +16,7 @@ module.exports = class UsersService {
       // Validar ID
       const validId = checkIdFormat(userId);
       if (validId.error) {
-        return validId
+        return validId;
       }
       const user = await Users.findById(userId);
       if (!user) {
@@ -33,7 +32,7 @@ module.exports = class UsersService {
       // Validar ID
       const validId = checkIdFormat(id);
       if (validId.error) {
-        return validId
+        return validId;
       }
       // Buscar el usuario en la base de datos
       const doctor = await Users.findById(id);
@@ -88,6 +87,52 @@ module.exports = class UsersService {
       };
     }
   }
+  static async completeRegister(doctorId, doctorDTO) {
+    try {
+      console.log(doctorId, doctorDTO, "doctorId, doctorDTO");
+      // Validar ID
+      const validId = checkIdFormat(doctorId);
+      if (validId.error) {
+        return validId;
+      }
+      // Buscar el usuario en la base de datos
+      let doctor = await Users.findById(doctorId);
+      if (!doctor) {
+        return {
+          error: true,
+          message: "El usuario no existe",
+        };
+      }
+      if (doctor.profileCompleted === true) {
+        return {
+          error: true,
+          message: "El usuario ya completó su registro",
+        };
+      }
+      // Validar que se proporcionen todos los campos requeridos
+      const { name, lastName, gender, cellphone, birthdate, field, specialty } =
+        doctorDTO;
+      // Actualizar el usuario
+      doctor.name = name;
+      doctor.lastName = lastName;
+      doctor.gender = gender;
+      doctor.cellphone = cellphone;
+      doctor.birthdate = birthdate;
+      doctor.field = field;
+      doctor.specialty = specialty;
+      doctor.profileCompleted = true;
+      const updatedUser = await doctor.save();
+      console.log(updatedUser, "updatedUser");
+      return {
+        error: false,
+        data: updatedUser,
+        message: "El usuario se ha actualizado correctamente",
+      };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
+
   static async updateUser(id, updateFields) {
     try {
       const UpdatableFields = [
@@ -95,9 +140,6 @@ module.exports = class UsersService {
         "lastName",
         "gender",
         "cellphone",
-        "country",
-        "province",
-        "city",
         "birthdate",
         "field",
         "specialty",
@@ -135,7 +177,7 @@ module.exports = class UsersService {
       // Validar ID
       const validId = checkIdFormat(id);
       if (validId.error) {
-        return validId
+        return validId;
       }
       const doctor = await Users.findById(id);
       // Verificar si el usuario existe
@@ -156,11 +198,11 @@ module.exports = class UsersService {
     // validar los formatos de ID
     const validDoctorId = checkIdFormat(doctorId);
     if (validDoctorId.error) {
-      return validDoctorId
+      return validDoctorId;
     }
     const validPatientID = checkIdFormat(patientId);
     if (validPatientID.error) {
-      return validPatientID
+      return validPatientID;
     }
     // Encontrar doctor y paciente
     const doctor = await Users.findById(doctorId);
