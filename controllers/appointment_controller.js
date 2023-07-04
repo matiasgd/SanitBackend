@@ -1,5 +1,7 @@
-const { Appointments, Users } = require("../db_models");
+const { Appointments, Users, MonthlyMetrics } = require("../db_models");
 const AppointmentsService = require("../services/appointment_services");
+const MonthlyMetricsService = require("../services/monthlyMetrics_services");
+const DailyMetricsService = require("../services/dailyMetrics_services");
 const moment = require("moment");
 
 module.exports = {
@@ -53,7 +55,7 @@ module.exports = {
         appointment: newAppointment.data,
         message: newAppointment.message,
       });
-    } catch {
+    } catch(err) {
       next(err);
     }
   },
@@ -78,6 +80,54 @@ module.exports = {
       next(err);
     }
   },
+  confirmAppointment: async (req, res, next) => {
+    try {
+      const appointmentId = req.params.appointmentId;     
+      const appointmentDTO = { ...req.body };
+      
+      // Actualiza la cita
+      const updatedAppointment = await AppointmentsService.updateAppointment(
+        appointmentId,
+        appointmentDTO
+      );  
+      if (updatedAppointment.error) {
+        return res
+        .status(400)
+        .send(updatedAppointment.message);
+      }  
+
+      // Actualiza los modelos de métricas mensuales y diarias
+      const currentDate = new Date();
+      const month = currentDate.getMonth() + 1
+      const year = currentDate.getFullYear();
+  
+      // Actualiza el modelo de métricas mensuales
+      const updatedMonthlyMetrics = await MonthlyMetricsService.updateMonthlyMetrics(
+        appointmentId,
+        month,
+        year,
+      );
+      // Actualiza el modelo de métricas diarias
+      const updateDailyMetrics = await DailyMetricsService.updateDailyMetrics(
+        appointmentId,
+        currentDate.toDateString(),
+      );
+      if (updatedMonthlyMetrics.error || updateDailyMetrics.error) {
+        return res
+        .status(400)
+        .send(updatedMonthlyMetrics.message || updateDailyMetrics.message);
+      }
+      res.status(201).send({
+        appointment: updatedAppointment.data,
+        MonthlyMetrics: updatedMonthlyMetrics.data,
+        DailyMetrics: updateDailyMetrics.data,
+        message: updatedAppointment.message,
+      });
+    }
+    catch (err) {
+      next(err);
+    }
+  },    
   deleteAppointment: async (req, res, next) => {
     try {
       const appointmentId = req.params.appointmentId;

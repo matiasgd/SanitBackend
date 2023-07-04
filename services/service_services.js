@@ -1,11 +1,16 @@
 const { Users, Services, Patients } = require("../db_models");
-
 const validTypes = ["Presencial", "Virtual", "Ambos"];
 const validCategories = ["Particular", "Prepaga", "Obra social", "Otro"];
+const { checkIdFormat } = require("../utils");
 
 module.exports = class ServicesService {
   static async getMyServices(id) {
     try {
+      // Validar ID
+      const validId = checkIdFormat(id);
+      if (validId.error) {
+        return validId;
+      }
       const user = await Users.findById(id);
       // Verificar si el usuario existe
       if (!user) {
@@ -38,6 +43,11 @@ module.exports = class ServicesService {
       if (!validCategories.includes(category)) {
         return { error: true, message: "El tipo de categoria es invalida!" };
       }
+      // validar ID
+      const validId = checkIdFormat(doctorId);
+      if (validId.error) {
+        return validId;
+      }
       // Verificar si el médico existe
       const doctor = await Users.findOne({ _id: doctorId });
       if (!doctor) {
@@ -64,8 +74,11 @@ module.exports = class ServicesService {
   }
   static async updateService(serviceId, doctorId, serviceDTO) {
     try {
-      const { name, duration, type, price, category } = serviceDTO;
-      // Validar que los campos obligatorios no esten vacios
+      // validar id
+      const validId = checkIdFormat(serviceId);
+      if (validId.error) {
+        return validId;
+      }
       // verificar doctor
       const doctor = await Users.findOne({ _id: doctorId });
       if (!doctor) {
@@ -97,6 +110,11 @@ module.exports = class ServicesService {
   }
   static async deleteService(serviceId, doctorId) {
     try {
+      // Validar ID
+      const validId = checkIdFormat(serviceId);
+      if (validId.error) {
+        return validId;
+      }
       // Verificar si el doctor existe
       const doctor = await Users.findOne({ _id: doctorId });
       if (!doctor) {

@@ -1,9 +1,16 @@
-const { Appointments } = require("../db_models");
+const { Appointments, Patients, Users } = require("../db_models");
+const mongoose = require("mongoose");
 const moment = require("moment");
+const { checkIdFormat } = require("../utils");
 
 module.exports = class AppointmentsService {
   static async findAppointmentById(appointmentId) {
     try {
+      // Validar ID
+      const validId = checkIdFormat(appointmentId);
+      if (validId.error) {
+        return validId;
+      }
       const appointment = await Appointments.findById(appointmentId);
       if (!appointment) {
         return {
@@ -18,6 +25,11 @@ module.exports = class AppointmentsService {
   }
   static async getAppointmentByDoctorId(doctorId) {
     try {
+      // Validar ID
+      const validId = checkIdFormat(doctorId);
+      if (validId.error) {
+        return validId;
+      }
       const appointments = await Appointments.find({ doctorId })
         .populate("patient", "name email")
         .populate("doctor", "name email");
@@ -38,7 +50,17 @@ module.exports = class AppointmentsService {
   }
   static async createAppointment(appointmentDTO) {
     try {
-      const { date, timeOfAppointment, patientId, doctorId } = appointmentDTO;
+      // Validar que se proporcionen todos los campos requeridos
+      const { date, timeOfAppointment, patientId, doctorId, serviceId } =
+        appointmentDTO;
+      // validar id
+      if (
+        !mongoose.isValidObjectId(doctorId) ||
+        !mongoose.isValidObjectId(patientId) ||
+        !mongoose.isValidObjectId(serviceId)
+      ) {
+        return { error: true, message: "El ID es inválido" };
+      }
       // Validar que se proporcionen todos los campos requeridos
       if (!date || !timeOfAppointment || !patientId || !doctorId) {
         return {
@@ -47,15 +69,45 @@ module.exports = class AppointmentsService {
             "La informacion de los campos para la creacion de una cita son incorrectos.",
         };
       }
+      // validar si el paciente existe
+      const patient = await Patients.findById(patientId);
+      if (!patient) {
+        return {
+          error: true,
+          message: "El paciente no existe",
+        };
+      }
+      // validar si el doctor existe
+      const doctor = await Users.findById(doctorId);
+      if (!doctor) {
+        return {
+          error: true,
+          message: "El doctor no existe",
+        };
+      }
+
+      // validar si el doctor está asignado al paciente
+      const isDoctorAssigned = doctor.patients.some((patId) =>
+        patId.equals(patientId)
+      );
+      if (!isDoctorAssigned) {
+        return {
+          error: true,
+          message: "El doctor no está asignado al paciente",
+        };
+      }
       // validar si el turno ya está reservado
       const existingAppointment = await Appointments.findOne({
         date,
         timeOfAppointment,
         doctor: doctorId,
       });
-      if (existingAppointment) {
-        return res.status(400).send("El turno ya está reservado");
-      }
+      if (existingAppointment)
+        return {
+          error: true,
+          message: "El turno del doctor ya existe en el horario solicitado",
+        };
+
       // validar si la fecha es anterior a la actual o si la fecha es igual a la actual y la hora es anterior a la actual.
       if (
         moment(date).isBefore(moment()) ||
@@ -73,6 +125,7 @@ module.exports = class AppointmentsService {
         timeOfAppointment,
         patient: patientId,
         doctor: doctorId,
+        service: serviceId,
       });
       await newAppointment.save();
       return {
@@ -86,9 +139,15 @@ module.exports = class AppointmentsService {
   }
   static async updateAppointment(appointmentId, appointmentDTO) {
     try {
+      // validar objectId
+      if (!mongoose.isValidObjectId(appointmentId)) {
+        return {
+          error: true,
+          message: "El ID es inválido",
+        };
+      }
       // validar si el turno existe
       const existingAppointment = await Appointments.findById(appointmentId);
-      console.log(existingAppointment, "existingAppointment")
       if (!existingAppointment) {
         return {
           error: true,
@@ -100,7 +159,7 @@ module.exports = class AppointmentsService {
         { _id: appointmentId },
         appointmentDTO,
         { new: true }
-      )
+      );
       return {
         error: false,
         data: updatedAppointment,
@@ -112,10 +171,14 @@ module.exports = class AppointmentsService {
   }
   static async deleteAppointment(appointmentId) {
     try {
+      // validar objectId
+      const validID = checkIdFormat(appointmentId);
+      if (validID.error) {
+        return validID;
+      }      
       const deletedAppointment = await Appointments.findByIdAndDelete(
         appointmentId
       )
-
       if (!deletedAppointment) {
         return {
           error: true,
@@ -130,9 +193,5 @@ module.exports = class AppointmentsService {
     } catch (err) {
       throw err;
     }
-}
-}
-
-
-   
-     
+  }
+};

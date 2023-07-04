@@ -22,10 +22,18 @@ module.exports = {
         doctorId,
         patientDTO
       );
+      console.log(newPatient, "newPatient")
       if (newPatient.error) {
-        return res.status(400).send(newPatient.message);
+        return res.status(400)
+        .send({
+          data: newPatient.data,
+          message:newPatient.message
+        });
       }
-      res.status(200).send(newPatient.data);
+      res.status(200).send({        
+        message:newPatient.message,
+        patient:newPatient.data
+      });
     } catch (err) {
       next(err);
     }

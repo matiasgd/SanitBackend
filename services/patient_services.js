@@ -1,7 +1,12 @@
 const { Patients, Users, Services } = require("../db_models");
 const moment = require("moment");
 const xlsx = require("xlsx");
-const { isValidDate, isValidGender, isValidEmail } = require("../utils");
+const {
+  isValidDate,
+  isValidGender,
+  isValidEmail,
+  checkIdFormat,
+} = require("../utils");
 
 module.exports = class PatientService {
   static async findPatients() {
@@ -14,6 +19,11 @@ module.exports = class PatientService {
   }
   static async findById(id) {
     try {
+      // Validar ID
+      const validId = checkIdFormat(id);
+      if (validId.error) {
+        return validId;
+      }
       const user = await Patients.findById(id);
       return { error: false, data: user };
     } catch (error) {
@@ -22,16 +32,26 @@ module.exports = class PatientService {
   }
   static async createPatient(doctorId, patientDTO) {
     try {
-      const id = doctorId.toString();
+      // Validar que se proporcionen todos los campos requeridos
       const { email, name, lastName } = patientDTO;
-      // ver si el doctor existe
-      let doctor = await Users.findById(id);
-      if (!doctor) {
+      if (!email || !name || !lastName) {
         return {
           error: true,
-          message: "El doctor no existe",
+          message:
+            "La informacion de los campos para la creacion de una cuenta son incorrectos.",
         };
       }
+      // Validar ID
+      const validId = checkIdFormat(doctorId);
+      if (validId.error) {
+        return validId;
+      }
+      // validar si el doctor existe
+      const doctor = await Users.findById(doctorId);
+      if (!doctor) {
+        return { error: true, message: "El usuario no existe" };
+      }  
+      const id = doctor._id.toString();
       // Validar que se proporcionen todos los campos requeridos
       if (!email || !name || !lastName) {
         return {
@@ -42,14 +62,12 @@ module.exports = class PatientService {
       }
       // Validar que el email no esté registrado
       let patient = await Patients.findOne({ email });
-      console.log(patient, "patient");
       // Crear un nuevo paciente
       if (patient) {
-        console.log("no entro al else");
         // El paciente ya existe, verificamos si el médico ya está asignado
         const isDoctorAssigned = patient.doctors.some((docId) =>
           docId.equals(id)
-        );
+        )
         if (!isDoctorAssigned) {
           // El médico no está asignado al paciente, lo agregamos al array de médicos
           patient.doctors.push(doctorId);
@@ -60,16 +78,23 @@ module.exports = class PatientService {
         }
         return { error: true, message: "El paciente ya existe" };
       } else {
-        console.log("entro al else");
         // El paciente no existe, creamos un nuevo registro
-        patient = await Patients.create({ ...patientDTO, doctors: [id] });
+        let patient = await Patients.create(
+          { ...patientDTO,
+            doctors: [doctor._id.toString()] 
+          });
         doctor.patients.push(patient._id.toString());
         await doctor.save();
-        return { error: false, data: patient };
+        return {
+          error: false,
+          data: patient,
+          message: "El paciente fue creado exitosamente!",
+        };
       }
     } catch (error) {
       return {
         error: true,
+        data: error,
         message: "Hubo un problema en la creacion del paciente.",
       };
     }
@@ -249,9 +274,7 @@ module.exports = class PatientService {
   static async updatePatient(patientId, patientDTO) {
     try {
       const patient = await Patients.findOne({ _id: patientId });
-      console.log(patient, "patient");
       // verificacion si el ID enviado por params no existe en la DB
-
       if (!patient) {
         return {
           error: true,
@@ -264,7 +287,8 @@ module.exports = class PatientService {
         return {
           error: true,
           data: patient,
-          message:"El paciente tiene más de un médico asignado, no se puede actualizar",
+          message:
+            "El paciente tiene más de un médico asignado, no se puede actualizar",
         };
       }
       // actualizacion si el paciente existe

@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 // Función para validar el formato de fecha (MM/DD/YYYY)
 function isValidDate(dateString) {
   const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/;
@@ -16,8 +18,16 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
+function checkIdFormat(id) {
+  if (!mongoose.isValidObjectId(id)) {
+    return { error: true, message: "El ID es inválido" };
+  }
+  return { error: false };
+}
+
 module.exports = {
   isValidDate,
   isValidGender,
   isValidEmail,
+  checkIdFormat,
 };
