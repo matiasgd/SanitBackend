@@ -9,7 +9,7 @@ const auth = require("./auth");
 
 
 router.use("/users", users);
-router.use("/addresses", addresses);
+router.use("/address", addresses);
 router.use("/appointments", appointments);
 router.use("/services", services);
 router.use("/patients", patients);

@@ -1,5 +1,7 @@
 const { Users, Patients } = require("../db_models");
 const mongoose = require("mongoose");
+const { checkIdFormat } = require("../utils");
+
 
 module.exports = class UsersService {
   static async findUsers() {
@@ -12,9 +14,10 @@ module.exports = class UsersService {
   }
   static async findById(userId) {
     try {
-      const validId = this.checkIdFormat(userId);
+      // Validar ID
+      const validId = checkIdFormat(userId);
       if (validId.error) {
-        return { error: true, message: validId.message };
+        return validId
       }
       const user = await Users.findById(userId);
       if (!user) {
@@ -27,10 +30,10 @@ module.exports = class UsersService {
   }
   static async findDoctorPatients(id) {
     try {
-      // Validar el formato de _id utilizando mongoose
-      const validId = this.checkIdFormat(id);
+      // Validar ID
+      const validId = checkIdFormat(id);
       if (validId.error) {
-        return { error: true, message: validId.message };
+        return validId
       }
       // Buscar el usuario en la base de datos
       const doctor = await Users.findById(id);
@@ -129,6 +132,11 @@ module.exports = class UsersService {
   }
   static async deleteUser(id) {
     try {
+      // Validar ID
+      const validId = checkIdFormat(id);
+      if (validId.error) {
+        return validId
+      }
       const doctor = await Users.findById(id);
       // Verificar si el usuario existe
       if (!doctor) {
@@ -146,13 +154,13 @@ module.exports = class UsersService {
   }
   static async removePatientFromDoctor(doctorId, patientId) {
     // validar los formatos de ID
-    const validDoctorID = this.checkIdFormat(doctorId);
-    if (validDoctorID.error) {
-      return { error: true, message: validDoctorID.message };
+    const validDoctorId = checkIdFormat(doctorId);
+    if (validDoctorId.error) {
+      return validDoctorId
     }
-    const validPatientID = this.checkIdFormat(patientId);
+    const validPatientID = checkIdFormat(patientId);
     if (validPatientID.error) {
-      return { error: true, message: validPatientID.message };
+      return validPatientID
     }
     // Encontrar doctor y paciente
     const doctor = await Users.findById(doctorId);
@@ -199,14 +207,5 @@ module.exports = class UsersService {
     await patient.save();
     await doctor.save();
     return { error: false, data: { removedPatient, removedDoctor } };
-  }
-
-  // Formulas de validacion y busqueda adicionales.
-
-  static checkIdFormat(id) {
-    if (!mongoose.isValidObjectId(id)) {
-      return { error: true, message: "El ID es inválido" };
-    }
-    return { error: false };
   }
 };

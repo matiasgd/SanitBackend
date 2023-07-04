@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { 
 getMyAddresses, 
-createAddress
+createAddress,
+deleteAddress,
 } = require("../controllers/addresses_controller");
 
 //-----------RUTAS GENERALES-------------//
@@ -12,5 +13,8 @@ router.get("/doctor/:doctorId", getMyAddresses);
 
 // CREAR UN NUEVO SERVICO
 router.post("/new/doctor/:doctorId", createAddress);
+
+// BORRAR DIRECCION
+router.delete("/:addressId", deleteAddress);
 
 module.exports = router;
