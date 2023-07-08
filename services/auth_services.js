@@ -33,7 +33,11 @@ module.exports = class AuthService {
         };
       }
       // Crear el token
-      const payload = { id: user._id, email: user.email };
+      const payload = {
+        id: user._id,
+        email: user.email,
+        profileCompleted: user.profileCompleted,
+      };
       const token = jwt.sign(payload, "your-secret-key", { expiresIn: "1h" });
       return {
         error: false,
