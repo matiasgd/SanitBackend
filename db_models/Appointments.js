@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
-//const { isEmail } = require("validator");
 
 const schema = Schema({
   date: { type: String, required: true },
@@ -18,6 +17,9 @@ const schema = Schema({
   doctor: { type: Schema.Types.ObjectId, ref: "users", required: true },
   address: { type: Schema.Types.ObjectId, ref: "addresses", required: true },
   service: { type: Schema.Types.ObjectId, ref: "services", required: true },
+  // datos de pago
+  payMethod: { type: String, enum: ["Efectivo", "Tarjeta de credito", "Tarjeta de debito"], required: true },
+  payStatus: { type: String, enum: ["Pendiente", "Pagado"], required: true, default: "Pendiente" },
 });
 
 schema.plugin(require("mongoose-autopopulate"));
