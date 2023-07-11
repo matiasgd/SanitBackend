@@ -5,6 +5,7 @@ const Services = require("./Services.js");
 const Patients = require("./Patients.js");
 const MonthlyMetric = require("./MonthlyMetric.js");
 const DailyMetric = require("./DailyMetric.js");
+const ExchangeRate = require("./ExchangeRate.js");
 
 module.exports = {
   Users,
@@ -14,4 +15,5 @@ module.exports = {
   Patients,
   MonthlyMetric,
   DailyMetric,
+  ExchangeRate
 };

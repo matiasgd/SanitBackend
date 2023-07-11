@@ -15,6 +15,7 @@ const schema = Schema({
     enum: ["ARS", "USD"],
   },
   price: { type: Number, required: true, min: 0 },
+  USDPrice: { type: Number,  },
   category: {
     type: String,
     required: true,
