@@ -18,8 +18,8 @@ const schema = Schema({
   address: { type: Schema.Types.ObjectId, ref: "addresses", required: true },
   service: { type: Schema.Types.ObjectId, ref: "services", required: true },
   // datos de pago
-  payMethod: { type: String, enum: ["Efectivo", "Tarjeta de credito", "Tarjeta de debito"], required: true },
-  payStatus: { type: String, enum: ["Pendiente", "Pagado"], required: true, default: "Pendiente" },
+  paymentMethod: { type: String, enum: ["Efectivo", "Tarjeta de credito", "Tarjeta de debito"], required: true },
+  paymentStatus: { type: String, enum: ["Pendiente", "Pagado"], required: true, default: "Pendiente" },
 });
 
 schema.plugin(require("mongoose-autopopulate"));

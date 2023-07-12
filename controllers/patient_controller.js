@@ -22,7 +22,6 @@ module.exports = {
         doctorId,
         patientDTO
       );
-      console.log(newPatient, "newPatient")
       if (newPatient.error) {
         return res.status(400)
         .send({

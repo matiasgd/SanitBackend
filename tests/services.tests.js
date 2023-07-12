@@ -67,7 +67,6 @@ describe("Service Controller", () => {
         price: 1000,
         category: "Prepaga",
       };
-      console.log(userId, "userId");
 
       const res = await chai
         .request(app)

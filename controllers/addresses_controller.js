@@ -13,12 +13,8 @@ module.exports = {
           message: "No se encontraron direcciones para este usuario",
         });
       }
-      res.send({
-        addresses: addresses,
-        message: "Las direcciones se han encontrado!",
-      });
       return res.status(201).send({
-        addresses: addresses,
+        addresses: addresses.data,
         message: "Las direcciones se han encontrado!",
       });
     } catch (err) {
@@ -40,7 +36,7 @@ module.exports = {
         });
       }
       res.status(201).send({
-        service: createdAddress,
+        address: createdAddress,
         message: createdAddress.message,
       });
     } catch (err) {
@@ -57,11 +53,10 @@ module.exports = {
         addressDTO
       );
       if (updatedAddress.error) {
-        return res.status(400)
-        .send(updatedAddress.message);
+        return res.status(400).send(updatedAddress.message);
       }
       res.status(201).send({
-        service: updatedAddress.data,
+        address: updatedAddress.data,
         message: updatedAddress.message,
       });
     } catch (err) {
@@ -85,7 +80,6 @@ module.exports = {
           message: removedAddress.message,
         });
       }
-      
     } catch (err) {
       next(err);
     }

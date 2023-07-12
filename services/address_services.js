@@ -115,7 +115,6 @@ module.exports = class AddressesService {
         };
       }
       const doctorId = address.doctor.toString();
-      console.log(doctorId, "doctorId");
       const doctor = await Users.findOne({ _id: doctorId });
       if (!doctor) {
         return {

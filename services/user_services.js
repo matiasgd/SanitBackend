@@ -122,7 +122,6 @@ module.exports = class UsersService {
       doctor.specialty = specialty;
       doctor.profileCompleted = true;
       const updatedUser = await doctor.save();
-      console.log(updatedUser, "updatedUser");
       return {
         error: false,
         data: updatedUser,

@@ -24,6 +24,7 @@ module.exports = class MonthlyMetricsService {
   static async updateDailyMetrics(appointmentId, date) {
     try {
       const appointment = await Appointments.findById(appointmentId);
+
       if (!appointment) {
         return {
           error: true,
@@ -48,7 +49,8 @@ module.exports = class MonthlyMetricsService {
         },
         { upsert: true }
       );
-      console.log(updatedDailyMetrics, "updatedDailyMetrics...")
+
+      console.log("updatedDailyMetrics", updatedDailyMetrics)
       return {
         error: false,
         data: updatedDailyMetrics,

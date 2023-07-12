@@ -28,7 +28,6 @@ module.exports = {
         doctorId,
         serviceDTO
       );
-      console.log(createdService, "createdService");
       if (createdService.error) {
         return res.status(400).send(createdService.message);
       }
