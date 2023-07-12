@@ -2,6 +2,22 @@ const exchangeRate_services = require("../services/exchangeRate_services.js");
 const { formatNumber } = require("../utils/exchangeRate.js");
 
 module.exports = {
+  getCurrentUSDARS: async (req, res, next) => {
+    try {
+      const USDARS = await exchangeRate_services.getCurrentUSDARS();
+      if (USDARS.error) {
+        return res.status(400).send({
+          message: USDARS.message,
+        });
+      }
+      return res.status(201).send({
+        data: USDARS.data,
+        message: USDARS.message,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
   createExchangeRateUSDARS: async (req, res, next) => {
     try {
       console.log("cron job running");
@@ -43,6 +59,7 @@ module.exports = {
         parallelFX: ParallelFX.data,
         message: "Exchange rate created successfully",
       });
+
     } catch (err) {
       next(err);
     }

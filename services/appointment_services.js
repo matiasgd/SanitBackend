@@ -51,8 +51,15 @@ module.exports = class AppointmentsService {
   static async createAppointment(appointmentDTO) {
     try {
       // Validar que se proporcionen todos los campos requeridos
-      const { date, timeOfAppointment, patientId, doctorId, serviceId } =
-        appointmentDTO;
+      const {
+        date,
+        timeOfAppointment,
+        patientId,
+        doctorId,
+        serviceId,
+        addressId,
+        paymentMethod,
+      } = appointmentDTO;
       // validar id
       if (
         !mongoose.isValidObjectId(doctorId) ||
@@ -126,6 +133,8 @@ module.exports = class AppointmentsService {
         patient: patientId,
         doctor: doctorId,
         service: serviceId,
+        address: addressId,
+        paymentMethod: paymentMethod,
       });
       await newAppointment.save();
       return {
@@ -175,10 +184,10 @@ module.exports = class AppointmentsService {
       const validID = checkIdFormat(appointmentId);
       if (validID.error) {
         return validID;
-      }      
+      }
       const deletedAppointment = await Appointments.findByIdAndDelete(
         appointmentId
-      )
+      );
       if (!deletedAppointment) {
         return {
           error: true,

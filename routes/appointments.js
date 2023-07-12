@@ -5,17 +5,17 @@ const {
   getAppointmentByDoctorId,
   createAppointment,
   updateAppointment,
-  confirmAppointment,
+  confirmPayment,
   deleteAppointment,
 } = require("../controllers/appointment_controller");
 
 //-----------RUTAS GENERALES-------------//
 
-// BUSCAR APPOINTMENT POR ID  
+// BUSCAR APPOINTMENT POR ID
 router.get("/:_id", getAppointmentById);
 
 // BUSCAR APPOINTMENTS POR ID DE DOCTOR
-router.get("/doctor/:_id", getAppointmentByDoctorId);
+router.get("/doctor/:id", getAppointmentByDoctorId);
 
 // CREAR UN APPOINTMENT
 router.post("/new", createAppointment);
@@ -24,7 +24,7 @@ router.post("/new", createAppointment);
 router.put("/update/:appointmentId", updateAppointment);
 
 // CONFIRMAR UN APPOINTMENT
-router.put("/confirm/:appointmentId", confirmAppointment);
+router.put("/payment/:appointmentId", confirmPayment);
 
 // BORRAR UN APPOINTMENT
 router.delete("/delete/:appointmentId", deleteAppointment);
