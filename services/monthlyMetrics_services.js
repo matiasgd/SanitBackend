@@ -1,6 +1,5 @@
 const { MonthlyMetric, Appointments, Services } = require("../db_models");
 
-
 module.exports = class MonthlyMetricsService {
   static async findMonthlyMetrics(doctorId, addressId) {
     try {
@@ -20,35 +19,40 @@ module.exports = class MonthlyMetricsService {
       return { error: true, data: error };
     }
   }
-  static async updateMonthlyMetrics(appointmentId, month, year) {    
-    try {      
+  static async updateMonthlyMetrics(
+    appointmentId,
+    buyerExchangeRate
+  ) {
+    try {
       const appointment = await Appointments.findById(appointmentId);
       if (!appointment) {
         return {
           error: true,
-          message: "La cita no existe", 
+          message: "La cita no existe",
         };
       }
-      if(appointment.status === "Completada") {
+      if (appointment.status === "Completada") {
         return {
           error: true,
           message: "La cita ya fue completada y no puede ser modificada.",
         };
-      }      
+      }
       const { doctor, address } = appointment;
-      const serviceId = appointment.service
+      const serviceId = appointment.service;
       const service = await Services.findById(serviceId);
+
       const updatedMonthlyMetrics = await MonthlyMetric.findOneAndUpdate(
         {
           address: address,
           doctor: doctor,
-          month: month,
-          year: year,
+          month: appointment.paymentDate.getMonth() + 1,
+          year: appointment.paymentDate.getFullYear(),
         },
         {
           $inc: {
             appointments: 1,
-            fees: service.price,
+            localFees: service.price,
+            usdFees: (service.price / buyerExchangeRate).toFixed(2),
           },
         },
         { upsert: true }
@@ -56,9 +60,6 @@ module.exports = class MonthlyMetricsService {
       return { error: false, data: updatedMonthlyMetrics };
     } catch (error) {
       return { error: true, data: error };
-    } 
+    }
   }
-}
-
-   
-     
+};

@@ -20,9 +20,13 @@ const schema = Schema({
     type: Number,
     required: true,
   },
-  fees: {
+  localFees: {
     type: Number,
-    required: true,
+    required: true
+  },
+  usdFees: {
+    type: Number,
+    required: true
   },
 });
 

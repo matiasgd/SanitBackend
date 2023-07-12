@@ -86,8 +86,7 @@ module.exports = {
     try {
       const patientId = req.params.patientId;
       const patientDTO = { ...req.body };
-      console.log(patientDTO, "patientDTO")
-      console.log(patientId, "patientId")
+
       const updatedPatient = await PatientsService.updatePatient(
         patientId,
         patientDTO

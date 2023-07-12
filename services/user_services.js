@@ -89,7 +89,6 @@ module.exports = class UsersService {
   }
   static async completeRegister(doctorId, doctorDTO) {
     try {
-      console.log(doctorId, doctorDTO, "doctorId, doctorDTO");
       // Validar ID
       const validId = checkIdFormat(doctorId);
       if (validId.error) {

@@ -12,7 +12,7 @@ const {
 //-----------RUTAS GENERALES-------------//
 
 // BUSCAR APPOINTMENT POR ID
-router.get("/:_id", getAppointmentById);
+router.get("/:id", getAppointmentById);
 
 // BUSCAR APPOINTMENTS POR ID DE DOCTOR
 router.get("/doctor/:id", getAppointmentByDoctorId);
