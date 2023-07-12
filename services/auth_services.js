@@ -107,7 +107,6 @@ module.exports = class AuthService {
           message: "Token inválido",
         };
       }
-      console.log(decodedToken, "decodedToken");
       const { userId } = decodedToken;
       const result = await AuthService.resetPassword(userId, newPassword);
       if (result.error) {

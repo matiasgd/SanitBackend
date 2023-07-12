@@ -2,15 +2,15 @@ const { Appointments, Users, MonthlyMetrics } = require("../db_models");
 const AppointmentsService = require("../services/appointment_services");
 const MonthlyMetricsService = require("../services/monthlyMetrics_services");
 const DailyMetricsService = require("../services/dailyMetrics_services");
+const exchangeRateService = require("../services/exchangeRate_services");
 const moment = require("moment");
 
 module.exports = {
   getAppointmentById: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const appointment = await AppointmentsService.findAppointmentById(id)
-        .populate("patient", "name email")
-        .populate("doctor", "name email");
+      const appointment = await AppointmentsService.findAppointmentById(id);
+
       if (appointment.error) {
         return res.status(400).send(appointment.message);
       }
@@ -78,6 +78,7 @@ module.exports = {
       next(err);
     }
   },
+
   confirmPayment: async (req, res, next) => {
     try {
       const appointmentId = req.params.appointmentId;
@@ -95,24 +96,32 @@ module.exports = {
       const currentDate = new Date();
       const month = currentDate.getMonth() + 1;
       const year = currentDate.getFullYear();
-      
+
+      // Obtener tipo de cambio
+      const exchangeRate = await exchangeRateService.getCurrentUSDARS();
+      const buyerExchangeRate = exchangeRate.data.buyer;
+
       // Actualiza el modelo de métricas mensuales
       const updatedMonthlyMetrics =
         await MonthlyMetricsService.updateMonthlyMetrics(
           appointmentId,
           month,
-          year
+          year,
+          buyerExchangeRate
         );
+
       // Actualiza el modelo de métricas diarias
       const updateDailyMetrics = await DailyMetricsService.updateDailyMetrics(
         appointmentId,
-        currentDate.toDateString()
+        buyerExchangeRate
       );
+
       if (updatedMonthlyMetrics.error || updateDailyMetrics.error) {
         return res
           .status(400)
           .send(updatedMonthlyMetrics.message || updateDailyMetrics.message);
       }
+
       res.status(201).send({
         appointment: updatedAppointment.data,
         MonthlyMetrics: updatedMonthlyMetrics.data,
@@ -123,6 +132,7 @@ module.exports = {
       next(err);
     }
   },
+
   deleteAppointment: async (req, res, next) => {
     try {
       const appointmentId = req.params.appointmentId;

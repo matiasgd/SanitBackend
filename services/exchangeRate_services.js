@@ -5,13 +5,14 @@ const { ExchangeRate } = require("../db_models");
 module.exports = class ExchangeRateService {
   static async getCurrentUSDARS() {
     try {
-      let USDARS = await ExchangeRate.find({
+      const exchangeRates = await ExchangeRate.find({
         pair: "USD/ARS",
         type: "Parallel",
       }).sort({
         date: -1,
       });
-      if (!USDARS) {
+      const currentExchangeRate = exchangeRates[0];
+      if (!exchangeRates) {
         return {
           error: true,
           message: "El dolar no existe",
@@ -19,13 +20,14 @@ module.exports = class ExchangeRateService {
       }
       return {
         error: false,
-        data: USDARS[0],
+        data: currentExchangeRate,
         message: "El dolar se ha encontrado!",
       };
     } catch (error) {
       return { error: true, data: error };
     }
   }
+
   static async getInfoUSDARS() {
     try {
       const dataDolar = await axios.get(
@@ -61,7 +63,7 @@ module.exports = class ExchangeRateService {
         pair: pair,
         buyer: buyer,
         seller: seller,
-        average: average
+        average: average,
       });
       const createdExchangeRate = await exchangeRate.save();
       return {
