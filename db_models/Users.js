@@ -10,6 +10,8 @@ const schema = Schema({
   password: { type: String, required: true },
   passwordResetToken: { type: String, default: null },
   role: { type: String, default: "user" },
+  attempts_count: { type: Number, default: 0 },
+  last_attempt_time: { type: Date, default: null },
   // datos de primer login y registro
   name: { type: String },
   lastName: { type: String },

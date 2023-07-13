@@ -6,7 +6,6 @@ const schema = Schema({
   street: { type: String, required: true },
   streetNumber: { type: Number, required: true },
   floor: { type: Number },
-  letter: { type: String },
   country: { type: String },
   province: { type: String },
   neighborhood: { type: String },

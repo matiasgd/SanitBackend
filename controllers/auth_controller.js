@@ -3,7 +3,6 @@ const AuthService = require("../services/auth_services");
 const { generateResetToken } = require("../utils/token");
 const { secret } = require("../config");
 
-
 module.exports = {
   userLogin: async (req, res, next) => {
     try {
@@ -55,22 +54,29 @@ module.exports = {
       next(error);
     }
   },
-
+  recoverPassword: async (req, res, next) => {
+    const { email } = req.body;
+    try {
+      const result = await AuthService.recoverPassword(email);
+      if (result.error) {
+        return res.status(404).send(result.message);
+      }
+      return res.status(200).send(result.message);
+    } catch (error) {
+      next(error);
+    }
+  },
   resetPassword: async (req, res, next) => {
     const { token, newPassword } = req.body;
     try {
-        const result = await AuthService.updatePasswordWithToken(
+      const result = await AuthService.updatePasswordWithToken(
         token,
         newPassword
-      )
+      );
       if (result.error) {
-        return res
-        .status(404)
-        .send(result.message);
+        return res.status(404).send(result.message);
       }
-      return res
-      .status(200)
-      .send(result.message);
+      return res.status(200).send(result.message);
     } catch (error) {
       next(error);
     }

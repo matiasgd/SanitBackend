@@ -1,4 +1,3 @@
-const { Appointments, Users, MonthlyMetrics } = require("../db_models");
 const AppointmentsService = require("../services/appointment_services");
 const MonthlyMetricsService = require("../services/monthlyMetrics_services");
 const DailyMetricsService = require("../services/dailyMetrics_services");

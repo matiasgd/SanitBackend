@@ -1,9 +1,14 @@
-const { Users, Patients } = require("../db_models");
+const { Users } = require("../db_models");
 const jwt = require("jsonwebtoken");
 const { secret } = require("../config");
 const bcrypt = require("bcrypt");
 const transporter = require("../config/transporter");
-const { decodeResetToken } = require("../utils/token");
+const { decodeResetToken, generateResetToken } = require("../utils/token");
+const {   
+  registerLoginAttempt,
+  validateLoginAttempts, 
+  deleteLoginAttempts,
+} = require("../utils/validations");
 
 module.exports = class AuthService {
   static async userLogin(authDTO) {
@@ -14,6 +19,14 @@ module.exports = class AuthService {
         return {
           error: true,
           message: "Faltan campos obligatorios",
+        };
+      }
+      // Validar que el usuario no haya superado el límite de intentos de inicio de sesión
+      const isAllowed = await validateLoginAttempts(email, 3);
+      if (!isAllowed) {
+        return {
+          error: true,
+          message:"Se ha superado el límite de intentos de inicio de sesión",
         };
       }
       // buscar el usuario en la base de datos
@@ -27,21 +40,53 @@ module.exports = class AuthService {
       // comparar la contraseña proporcionada con la contraseña almacenada en la base de datos
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
+      // registrar el intento de inicio de sesión
+      await registerLoginAttempt(email);
         return {
           error: true,
           message: "Credenciales incorrectas",
         };
       }
       // Crear el token
+
       const payload = {
         id: user._id,
         email: user.email,
         profileCompleted: user.profileCompleted,
       };
       const token = jwt.sign(payload, "your-secret-key", { expiresIn: "1h" });
+      // eliminar los intentos de inicio de sesión
+      await deleteLoginAttempts(email);
       return {
         error: false,
         data: { token: token, payload: payload },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+  // recuperar contraseña
+  static async recoverPassword(email) {
+    try {
+      const user = await Users.findOne({email: email});
+      if (!user) {
+        return {
+          error: true,
+          message: "El email no se encuentra registrado",
+        };
+      }
+      const resetToken = generateResetToken(user._id);
+      const resetLink = `https://tuaplicacion.com/reset-password?token=${resetToken}`;
+      const mailOptions = {
+        from: "jlema1990@gmail.com",
+        to: email,
+        subject: "Recuperación de contraseña",
+        text: `¡Hola! Para restablecer tu contraseña, haz clic en el siguiente enlace: ${resetLink}`,
+      };
+      await transporter.sendMail(mailOptions);
+      return {
+        error: false,
+        message: "Se ha enviado un correo electrónico para restablecer la contraseña",
       };
     } catch (error) {
       throw error;
