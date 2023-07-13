@@ -9,6 +9,7 @@ const {
   validateLoginAttempts, 
   deleteLoginAttempts,
 } = require("../utils/validations");
+const { corsOrigin } = require("../config");
 
 module.exports = class AuthService {
   static async userLogin(authDTO) {
@@ -76,7 +77,7 @@ module.exports = class AuthService {
         };
       }
       const resetToken = generateResetToken(user._id);
-      const resetLink = `https://tuaplicacion.com/reset-password?token=${resetToken}`;
+      const resetLink = `${corsOrigin}/reset-password?token=${resetToken}`;
       const mailOptions = {
         from: "jlema1990@gmail.com",
         to: email,
@@ -126,7 +127,7 @@ module.exports = class AuthService {
   // Cambio de contraseña por token
   static async sendPasswordResetEmail(email, resetToken) {
     try {
-      const resetLink = `https://tuaplicacion.com/reset-password?token=${resetToken}`;
+      const resetLink = `${corsOrigin}/reset-password?token=${resetToken}`;
       const mailOptions = {
         from: "jlema1990@gmail.com",
         to: email,
