@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Users = require("../db_models/Users");
 
 // Función para validar el formato de fecha (MM/DD/YYYY)
 function isValidDate(dateString) {
@@ -38,9 +39,60 @@ function validatePasswordLength(password, minLength) {
 }
 
 // Validar cantidad de intentos de inicio de sesión
-function validateLoginAttempts(attempts, maxAttempts) {
-  attempts <= maxAttempts;
-  return true;
+async function validateLoginAttempts(user_id, maxAttempts) {
+  try {
+    const loginAttempts = await Users.findOne({ user_id });
+    if (loginAttempts && loginAttempts.attempts_count >= maxAttempts) {
+      // Se ha superado el límite de intentos de inicio de sesión
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    // Manejar el error en la consulta de los intentos de inicio de sesión
+    console.error(error);
+    return true; // Permitir el inicio de sesión en caso de error
+  }
+}
+
+// Función para registrar un intento de inicio de sesión
+async function registerLoginAttempt(email) {
+  try {
+    const loginAttempts = await Users.findOne({ email: email });
+
+    if (loginAttempts) {
+      loginAttempts.attempts_count += 1;
+      loginAttempts.last_attempt_time = new Date();
+      await loginAttempts.save();
+    } else {
+      await Users.updateOne(
+        { email: email },
+        {
+          $set: {
+            attempts_count: 1,
+            last_attempt_time: new Date(),
+          },
+        }
+      );
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Función para registrar un intento de inicio de sesión
+async function deleteLoginAttempts(email) {
+  try {
+    const user = await Users.findOne({ email: email });
+    user.$set({
+      attempts_count: 0,
+      last_attempt_time: null,
+    });
+    await user.save();
+      
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 module.exports = {
@@ -51,4 +103,7 @@ module.exports = {
   validateSpecialCharacters,
   validatePasswordLength,
   validateLoginAttempts,
+  registerLoginAttempt,
+  validateLoginAttempts,
+  deleteLoginAttempts,
 };

@@ -4,6 +4,7 @@ const {
   userMe,
   userLogin,
   sendPasswordResetEmail,
+  recoverPassword,
   resetPassword,
   updatePassword,
   userLogout,
@@ -16,6 +17,9 @@ router.get("/me", userMe);
 
 // AUTENTICAR UN USUARIO
 router.post("/login", userLogin);
+
+// RECOVER PASSWORD
+router.post("/recover", recoverPassword);
 
 // RESET PASSWORD
 router.post("/send-reset-email/:userId", sendPasswordResetEmail);
