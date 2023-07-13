@@ -18,6 +18,7 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
+// Función para validar el formato de un ID de MongoDB
 function checkIdFormat(id) {
   if (!mongoose.isValidObjectId(id)) {
     return { error: true, message: "El ID es inválido" };
@@ -25,9 +26,29 @@ function checkIdFormat(id) {
   return { error: false };
 }
 
+// Validar caracteres especiales en una cadena
+function validateSpecialCharacters(str) {
+  const regex = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+/;
+  return regex.test(str);
+}
+
+// Validar longitud mínima del password
+function validatePasswordLength(password, minLength) {
+  return password.length >= minLength;
+}
+
+// Validar cantidad de intentos de inicio de sesión
+function validateLoginAttempts(attempts, maxAttempts) {
+  attempts <= maxAttempts;
+  return true;
+}
+
 module.exports = {
   isValidDate,
   isValidGender,
   isValidEmail,
   checkIdFormat,
+  validateSpecialCharacters,
+  validatePasswordLength,
+  validateLoginAttempts,
 };

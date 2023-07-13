@@ -1,7 +1,7 @@
 const { Patients, Users, Services } = require("../db_models");
 const moment = require("moment");
 const xlsx = require("xlsx");
-const { isValidDate, isValidGender, isValidEmail } = require("../utils");
+const { isValidDate, isValidGender, isValidEmail } = require("../utils/validations");
 const PatientsService = require("../services/patient_services");
 
 module.exports = {
