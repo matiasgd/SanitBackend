@@ -1,7 +1,7 @@
 const { Appointments, Patients, Users } = require("../db_models");
 const mongoose = require("mongoose");
 const moment = require("moment");
-const { checkIdFormat } = require("../utils");
+const { checkIdFormat } = require("../utils/validations");
 
 module.exports = class AppointmentsService {
   static async findAppointmentById(appointmentId) {
@@ -12,7 +12,7 @@ module.exports = class AppointmentsService {
         return validId;
       }
       const appointment = await Appointments.findById(appointmentId);
-      
+
       if (!appointment) {
         return {
           error: true,

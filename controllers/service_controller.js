@@ -1,4 +1,3 @@
-const { Services, Users, Patients } = require("../db_models");
 const ServicesService = require("../services/service_services");
 
 module.exports = {

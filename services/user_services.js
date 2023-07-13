@@ -1,6 +1,11 @@
 const { Users, Patients } = require("../db_models");
 const mongoose = require("mongoose");
-const { checkIdFormat } = require("../utils");
+const {
+  checkIdFormat,
+  validateSpecialCharacters,
+  validatePasswordLength,
+  isValidEmail
+} = require("../utils/validations");
 
 module.exports = class UsersService {
   static async findUsers() {
@@ -29,11 +34,13 @@ module.exports = class UsersService {
   }
   static async findDoctorPatients(id) {
     try {
+
       // Validar ID
       const validId = checkIdFormat(id);
       if (validId.error) {
         return validId;
       }
+
       // Buscar el usuario en la base de datos
       const doctor = await Users.findById(id);
       if (!doctor) {
@@ -42,6 +49,7 @@ module.exports = class UsersService {
       const patientIds = doctor.patients.map((patientId) => {
         return new mongoose.Types.ObjectId(patientId);
       });
+
       // Buscar los pacientes en la base de datos
       const patientsInfo = await Patients.find({ _id: { $in: patientIds } })
         .populate("doctors", "name lastName")
@@ -64,6 +72,33 @@ module.exports = class UsersService {
           message:
             "La información de los campos para la creación de una cuenta es incorrecta.",
         };
+      }      
+      const validEmail = isValidEmail(email);
+      // Validar que el email tenga el formato correcto
+      if (!validEmail) {
+        console.log("email no valido")
+        return {
+          error: true,
+          message: "El email no tiene el formato correcto.",
+        };
+      }
+      // Validar longitud de la contraseña
+      const validPasswordLength = validatePasswordLength(password, 8);
+      if (!validPasswordLength) {
+        console.log("contraseña no es lo suficientemente larga")
+        return {
+          error: true,
+          message: "La contraseña debe tener al menos 8 caracteres.",
+        };
+      }
+      // Validar que la contraseña no contenga caracteres especiales
+      const validPasswordCharacters = validateSpecialCharacters(password);
+      if (validPasswordCharacters) {
+        console.log("caracteres especiales")
+        return {
+          error: true,
+          message: "La contraseña no puede contener caracteres especiales.",
+        };
       }
       // Validar que el email no esté registrado
       const user = await Users.findOne({ email });
@@ -73,7 +108,6 @@ module.exports = class UsersService {
           message: "El email ya está registrado.",
         };
       }
-
       // Crear el usuario
       const newUser = await Users.create({ email, password });
       return {
