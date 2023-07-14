@@ -5,6 +5,7 @@ const {
   getAppointmentByDoctorId,
   createAppointment,
   updateAppointment,
+  confirmAppointment,
   confirmPayment,
   deleteAppointment,
 } = require("../controllers/appointment_controller");
@@ -22,6 +23,9 @@ router.post("/new", createAppointment);
 
 // MODIFICAR UN APPOINTMENT
 router.put("/update/:appointmentId", updateAppointment);
+
+// CONFIRMAR UN APPOINTMENT
+router.put("/status/:appointmentId", confirmAppointment);
 
 // CONFIRMAR UN APPOINTMENT
 router.put("/payment/:appointmentId", confirmPayment);

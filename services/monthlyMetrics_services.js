@@ -19,10 +19,7 @@ module.exports = class MonthlyMetricsService {
       return { error: true, data: error };
     }
   }
-  static async updateMonthlyMetrics(
-    appointmentId,
-    buyerExchangeRate
-  ) {
+  static async payments(appointmentId, buyerExchangeRate) {
     try {
       const appointment = await Appointments.findById(appointmentId);
       if (!appointment) {
@@ -53,6 +50,40 @@ module.exports = class MonthlyMetricsService {
             appointments: 1,
             localFees: service.price,
             usdFees: (service.price / buyerExchangeRate).toFixed(2),
+          },
+        },
+        { upsert: true }
+      );
+      return { error: false, data: updatedMonthlyMetrics };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
+  static async cancelations(appointmentId) {
+    try {
+      const appointment = await Appointments.findById(appointmentId);
+      if (!appointment) {
+        return {
+          error: true,
+          message: "La cita no existe",
+        };
+      }
+      const { doctor, address } = appointment;
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1; // El mes se indexa desde 0, por lo que se le suma 1
+      const currentYear = currentDate.getFullYear();
+
+      const updatedMonthlyMetrics = await MonthlyMetric.findOneAndUpdate(
+        {
+          address: address,
+          doctor: doctor,
+          month: currentMonth,
+          year: currentYear,
+        },
+        {
+          $inc: {
+            appointments: 1,
+            cancelations: appointment.status === "Cancelada" ? 1 : 0,
           },
         },
         { upsert: true }

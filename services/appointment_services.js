@@ -164,13 +164,15 @@ module.exports = class AppointmentsService {
           message: "El turno no existe",
         };
       }
-      // if(existingAppointment.paymentStatus === "Pagado") {
-      //   return {
-      //     error: true,
-      //     message: "El turno ya fue pagado y no puede ser modificado.",
-      //   };
-      // }
-
+      if (
+        existingAppointment.status === "Cancelada" ||
+        existingAppointment.paymentStatus === "Pagado"
+      ) {
+        return {
+          error: true,
+          message: "La cita se encuentra cerrada.",
+        };
+      }
       // actualizacion si el turno existe
       const updatedAppointment = await Appointments.findOneAndUpdate(
         { _id: appointmentId },
