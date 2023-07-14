@@ -49,11 +49,51 @@ module.exports = class MonthlyMetricsService {
             appointments: 1,
             localFees: service.price,
             usdFees: (service.price / buyerExchangeRate).toFixed(2),
+            cancelations: appointment.status === "Cancelada" ? 1 : 0,
           },
         },
         { upsert: true }
       );
 
+      return {
+        error: false,
+        data: updatedDailyMetrics,
+      };
+    } catch (error) {
+      return {
+        error: true,
+        data: error,
+      };
+    }
+  }
+  static async cancelations(appointmentId) {
+    try {
+      const appointment = await Appointments.findById(appointmentId);
+
+      if (!appointment) {
+        return {
+          error: true,
+          message: "La cita no existe",
+        };
+      }
+
+      const { doctor, address } = appointment;
+      const appointmentDate = new Date(appointment.paymentDate);
+
+      const updatedDailyMetrics = await DailyMetric.findOneAndUpdate(
+        {
+          address: address,
+          doctor: doctor,
+          date: appointmentDate.toISOString().split("T")[0],
+        },
+        {
+          $inc: {
+            appointments: 1,
+            cancelations: appointment.status === "Cancelada" ? 1 : 0,
+          },
+        },
+        { upsert: true }
+      );
       return {
         error: false,
         data: updatedDailyMetrics,

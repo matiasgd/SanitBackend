@@ -32,6 +32,10 @@ const schema = Schema({
     type: Number,
     required: true
   },
+  cancelations: {
+    type: Number,
+    required: true
+  },
 });
 
 

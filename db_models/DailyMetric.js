@@ -22,11 +22,15 @@ const schema = Schema({
   },
   localFees: {
     type: Number,
-    required: true
+    required: true,
   },
   usdFees: {
     type: Number,
-    required: true
+    required: true,
+  },
+  cancelations: {
+    type: Number,
+    required: true,
   },
 });
 

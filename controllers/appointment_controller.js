@@ -77,7 +77,53 @@ module.exports = {
       next(err);
     }
   },
+  confirmAppointment: async (req, res, next) => {
+    try {
+      const appointmentId = req.params.appointmentId;
+      const appointmentDTO = { ...req.body };
+      // Actualiza la cita
+      const updatedAppointment = await AppointmentsService.updateAppointment(
+        appointmentId,
+        appointmentDTO
+      );
+      if (updatedAppointment.error) {
+        return res.status(400).send(updatedAppointment.message);
+      }
+      // Actualiza los modelos de métricas mensuales y diarias
+      const currentDate = new Date();
+      const month = currentDate.getMonth() + 1;
+      const year = currentDate.getFullYear();
 
+      // Actualiza el modelo de métricas mensuales
+      const updatedMonthlyMetrics = await MonthlyMetricsService.cancelations(
+        appointmentId,
+        month,
+        year
+      );
+      console.log(updatedMonthlyMetrics)
+
+      // Actualiza el modelo de métricas diarias
+      const updateDailyMetrics = await DailyMetricsService.cancelations(
+        appointmentId,
+      );
+
+      if (updatedMonthlyMetrics.error || updateDailyMetrics.error) {
+        return res
+          .status(400)
+          .send(updatedMonthlyMetrics.message || updateDailyMetrics.message);
+      }
+
+
+      res.status(201).send({
+        appointment: updatedAppointment.data,
+        MonthlyMetrics: updatedMonthlyMetrics.data,
+        DailyMetrics: updateDailyMetrics.data,
+        message: updatedAppointment.message,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
   confirmPayment: async (req, res, next) => {
     try {
       const appointmentId = req.params.appointmentId;
@@ -101,13 +147,12 @@ module.exports = {
       const buyerExchangeRate = exchangeRate.data.buyer;
 
       // Actualiza el modelo de métricas mensuales
-      const updatedMonthlyMetrics =
-        await MonthlyMetricsService.updateMonthlyMetrics(
-          appointmentId,
-          month,
-          year,
-          buyerExchangeRate
-        );
+      const updatedMonthlyMetrics = await MonthlyMetricsService.payments(
+        appointmentId,
+        month,
+        year,
+        buyerExchangeRate
+      );
 
       // Actualiza el modelo de métricas diarias
       const updateDailyMetrics = await DailyMetricsService.updateDailyMetrics(
