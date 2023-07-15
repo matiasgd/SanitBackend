@@ -35,17 +35,19 @@ module.exports = class AddressesService {
     try {
       const {
         street,
-        streetNumber,
+        number,
         floor,
-        letter,
+        addressType,
+        webAddress,
+        houseApartment,
         country,
         province,
-        neighborhood,
+        city,
         zipCode,
       } = addressDTO;
 
       // validar que los campos obligatorios no esten vacios
-      if (!street || !streetNumber || !country || !province || !neighborhood) {
+      if (!street || !number) {
         return {
           error: true,
           message: "Faltan campos obligatorios",
@@ -59,26 +61,31 @@ module.exports = class AddressesService {
       // Crear el nuevo servicio
       const newAddress = new Addresses({
         doctor: doctorId,
-        street,
-        streetNumber,
-        floor,
-        letter,
-        country,
-        province,
-        neighborhood,
-        zipCode,
+        ...addressDTO,
       });
-      // Guardar el servicio en la base de datos
-      const createdAddress = await newAddress.save();
-      doctor.addresses.push(createdAddress._id.toString());
+
+      // agregar la nueva direccion al medico
+      const updatedDoctor = await Users.findOneAndUpdate(
+        { _id: doctorId },
+        { $push: { addresses: newAddress._id } },
+        { new: true }
+      );
+      if (!updatedDoctor) {
+        return { error: true, message: "Médico no encontrado" };
+      }
+      console.log(updatedDoctor);
+      console.log(newAddress);
       return {
         error: false,
-        data: createdAddress,
+        address: newAddress,
+        doctor: updatedDoctor,
+        message: "La direccion se ha creado exitosamente",
       };
     } catch (error) {
       return { error: true, data: error };
     }
   }
+
   static async updateAddress(addressId, addressDTO) {
     try {
       // validar ID
