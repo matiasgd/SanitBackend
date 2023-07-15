@@ -23,7 +23,6 @@ module.exports = {
   },
   createAddress: async (req, res, next) => {
     try {
-      console.log(req.body)
       const doctorId = req.params.doctorId;
       const addressDTO = { ...req.body };
       // Crear una nueva direccion
@@ -44,6 +43,7 @@ module.exports = {
       next(err);
     }
   },
+
   updateAddress: async (req, res, next) => {
     try {
       const addressId = req.params.addressId;

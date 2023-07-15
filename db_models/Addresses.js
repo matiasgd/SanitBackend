@@ -4,11 +4,14 @@ const { Schema } = mongoose;
 const schema = Schema({
   doctor: { type: Schema.Types.ObjectId, ref: "users" },
   street: { type: String, required: true },
-  streetNumber: { type: Number, required: true },
+  number: { type: Number, required: true },
   floor: { type: Number },
+  addressType: { type: String },
+  webAddress: { type: String },
+  houseApartment: { type: String },
   country: { type: String },
   province: { type: String },
-  neighborhood: { type: String },
+  city: { type: String },
   zipCode: { type: Number },
 });
 
