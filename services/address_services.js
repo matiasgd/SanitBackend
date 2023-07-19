@@ -81,8 +81,6 @@ module.exports = class AddressesService {
   }
   static async updateAddress(addressId, addressDTO) {
     try {
-      // validar ID
-
       // actualizacion si el paciente existe
       const updatedAddress = await Addresses.findOneAndUpdate(
         { _id: addressId },

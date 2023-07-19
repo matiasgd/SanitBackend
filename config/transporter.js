@@ -1,13 +1,12 @@
 const nodemailer = require("nodemailer");
-const { email, password } = require("../config");
+const { sanitEmail, sanitPassword } = require("../config");
 // Configuración del transporte de Nodemailer
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
-    user: email,
-    pass: password,
+    user: sanitEmail,
+    pass: sanitPassword,
   },
 });
 
 module.exports = transporter;
-

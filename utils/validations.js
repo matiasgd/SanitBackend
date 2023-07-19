@@ -39,19 +39,17 @@ function validatePasswordLength(password, minLength) {
 }
 
 // Validar cantidad de intentos de inicio de sesión
-async function validateLoginAttempts(user_id, maxAttempts) {
+async function validateLoginAttempts(info, maxAttempts) {
   try {
-    const loginAttempts = await Users.findOne({ user_id });
-    if (loginAttempts && loginAttempts.attempts_count >= maxAttempts) {
-      // Se ha superado el límite de intentos de inicio de sesión
+    const user = await Users.findOne({ email: info });
+    const loginAttempts = user.attempts_count;
+    if (loginAttempts >= maxAttempts) {
       return false;
     }
-
     return true;
   } catch (error) {
-    // Manejar el error en la consulta de los intentos de inicio de sesión
     console.error(error);
-    return true; // Permitir el inicio de sesión en caso de error
+    return true;
   }
 }
 
@@ -89,7 +87,6 @@ async function deleteLoginAttempts(email) {
       last_attempt_time: null,
     });
     await user.save();
-      
   } catch (error) {
     console.error(error);
   }

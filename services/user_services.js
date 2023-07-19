@@ -4,7 +4,7 @@ const {
   checkIdFormat,
   validateSpecialCharacters,
   validatePasswordLength,
-  isValidEmail
+  isValidEmail,
 } = require("../utils/validations");
 
 module.exports = class UsersService {
@@ -16,7 +16,8 @@ module.exports = class UsersService {
       return { error: true, data: error };
     }
   }
-  static async findById(userId) {
+
+  static async findOneUser(userId) {
     try {
       // Validar ID
       const validId = checkIdFormat(userId);
@@ -25,7 +26,10 @@ module.exports = class UsersService {
       }
       const user = await Users.findById(userId);
       if (!user) {
-        return { error: true, message: "El usuario no existe" };
+        return {
+          error: true,
+          message: "El usuario no existe",
+        };
       }
       return { error: false, data: user };
     } catch (error) {
@@ -34,7 +38,6 @@ module.exports = class UsersService {
   }
   static async findDoctorPatients(id) {
     try {
-
       // Validar ID
       const validId = checkIdFormat(id);
       if (validId.error) {
@@ -72,11 +75,11 @@ module.exports = class UsersService {
           message:
             "La información de los campos para la creación de una cuenta es incorrecta.",
         };
-      }      
+      }
       const validEmail = isValidEmail(email);
       // Validar que el email tenga el formato correcto
       if (!validEmail) {
-        console.log("email no valido")
+        console.log("email no valido");
         return {
           error: true,
           message: "El email no tiene el formato correcto.",
@@ -85,7 +88,6 @@ module.exports = class UsersService {
       // Validar longitud de la contraseña
       const validPasswordLength = validatePasswordLength(password, 8);
       if (!validPasswordLength) {
-        console.log("contraseña no es lo suficientemente larga")
         return {
           error: true,
           message: "La contraseña debe tener al menos 8 caracteres.",
@@ -94,7 +96,6 @@ module.exports = class UsersService {
       // Validar que la contraseña no contenga caracteres especiales
       const validPasswordCharacters = validateSpecialCharacters(password);
       if (validPasswordCharacters) {
-        console.log("caracteres especiales")
         return {
           error: true,
           message: "La contraseña no puede contener caracteres especiales.",
@@ -167,6 +168,11 @@ module.exports = class UsersService {
 
   static async updateUser(id, updateFields) {
     try {
+      // Validar ID
+      const validId = checkIdFormat(id);
+      if (validId.error) {
+        return validId;
+      }
       const UpdatableFields = [
         "name",
         "lastName",
@@ -216,19 +222,23 @@ module.exports = class UsersService {
       if (!doctor) {
         return {
           error: true,
-          message: "Doctor no encontrado",
+          message: "El usuario no existe",
         };
       }
       // Eliminar el usuario
       const removedUser = await Users.findOneAndDelete({ _id: id });
-      return { error: false, data: removedUser };
+      return {
+        error: false,
+        data: removedUser,
+        message: "El usuario se ha eliminado correctamente",
+      };
     } catch (error) {
       return { error: true, data: error };
     }
   }
-  static async removePatientFromDoctor(doctorId, patientId) {
+  static async removePatientFromDoctor(userId, patientId) {
     // validar los formatos de ID
-    const validDoctorId = checkIdFormat(doctorId);
+    const validDoctorId = checkIdFormat(userId);
     if (validDoctorId.error) {
       return validDoctorId;
     }
@@ -236,50 +246,44 @@ module.exports = class UsersService {
     if (validPatientID.error) {
       return validPatientID;
     }
+
     // Encontrar doctor y paciente
-    const doctor = await Users.findById(doctorId);
+    const doctor = await Users.findById(userId);
     const patient = await Patients.findById(patientId);
     // verificar si el médico y el paciente existen
     if (!doctor) {
-      return { error: true, message: "Médico no encontrado" };
+      return { error: true, message: "El usuario no existe" };
     }
     if (!patient) {
-      return { error: true, message: "Paciente no encontrado" };
+      return { error: true, message: "Paciente no existe" };
     }
-    // verificar si el paciente está asociado al médico
-    const patientIndex = doctor.patients.findIndex((patient) => {
-      return (
-        patient._id.toString() ==
-        new mongoose.Types.ObjectId(patientId)._id.toString()
-      );
-    });
-    if (patientIndex === -1) {
-      return {
-        error: true,
-        message: "El paciente no está asociado a este médico",
-      };
-    }
-    const doctorIndex = patient.doctors.findIndex((doctor) => {
-      return (
-        doctor._id.toString() ==
-        new mongoose.Types.ObjectId(doctorId)._id.toString()
-      );
-    });
+    // verificar asociacion de medico y paciente
+    const doctorIndex = patient.doctors.findIndex(
+      (doctor) => doctor._id.toString() === userId.toString()
+    );
     if (doctorIndex === -1)
       return {
         error: true,
         message: "El médico no está asociado a este paciente",
       };
-
-    // eliminar el paciente del array de pacientes del médico y el médico del array de médicos del paciente
-    const removedPatient = doctor.patients.splice(patientIndex, 1)[0];
-    await doctor.save();
-    const removedDoctor = patient.doctors.splice(doctorIndex, 1)[0];
-    await patient.save();
-    patient.previousDoctors.push(removedDoctor);
-    doctor.previousPatients.push(removedPatient);
-    await patient.save();
-    await doctor.save();
-    return { error: false, data: { removedPatient, removedDoctor } };
+    // actualiza al doctor y al paciente
+    const updatedDoctor = await Users.findOneAndUpdate(
+      { _id: userId, patients: patientId },
+      {
+        $pull: { patients: patientId },
+        $push: { previousPatients: patientId },
+      },
+      { new: true }
+    );
+    const updatedPatient = await Patients.findOneAndUpdate(
+      { _id: patientId, doctors: userId },
+      { $pull: { doctors: userId }, $push: { previousDoctors: userId } },
+      { new: true }
+    );
+    return {
+      error: false,
+      data: { updatedPatient, updatedDoctor },
+      message: "El paciente se ha eliminado correctamente",
+    };
   }
 };

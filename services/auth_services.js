@@ -4,12 +4,13 @@ const { secret } = require("../config");
 const bcrypt = require("bcrypt");
 const transporter = require("../config/transporter");
 const { decodeResetToken, generateResetToken } = require("../utils/token");
-const {   
+const {
   registerLoginAttempt,
-  validateLoginAttempts, 
+  validateLoginAttempts,
   deleteLoginAttempts,
 } = require("../utils/validations");
-const { corsOrigin } = require("../config");
+const { corsOrigin, sanitEmail } = require("../config");
+const mongoose = require("mongoose");
 
 module.exports = class AuthService {
   static async userLogin(authDTO) {
@@ -27,9 +28,10 @@ module.exports = class AuthService {
       if (!isAllowed) {
         return {
           error: true,
-          message:"Se ha superado el límite de intentos de inicio de sesión",
+          message: "Se ha superado el límite de intentos de inicio de sesión",
         };
       }
+
       // buscar el usuario en la base de datos
       const user = await Users.findOne({ email: email });
       if (!user) {
@@ -38,18 +40,19 @@ module.exports = class AuthService {
           message: "Credenciales incorrectas",
         };
       }
+
       // comparar la contraseña proporcionada con la contraseña almacenada en la base de datos
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-      // registrar el intento de inicio de sesión
-      await registerLoginAttempt(email);
+        // registrar el intento de inicio de sesión
+        await registerLoginAttempt(email);
         return {
           error: true,
           message: "Credenciales incorrectas",
         };
       }
-      // Crear el token
 
+      // Crear el token
       const payload = {
         id: user._id,
         email: user.email,
@@ -69,7 +72,7 @@ module.exports = class AuthService {
   // recuperar contraseña
   static async recoverPassword(email) {
     try {
-      const user = await Users.findOne({email: email});
+      const user = await Users.findOne({ email: email });
       if (!user) {
         return {
           error: true,
@@ -79,7 +82,7 @@ module.exports = class AuthService {
       const resetToken = generateResetToken(user._id);
       const resetLink = `${corsOrigin}/reset-password?token=${resetToken}`;
       const mailOptions = {
-        from: "jlema1990@gmail.com",
+        from: sanitEmail,
         to: email,
         subject: "Recuperación de contraseña",
         text: `¡Hola! Para restablecer tu contraseña, haz clic en el siguiente enlace: ${resetLink}`,
@@ -87,7 +90,8 @@ module.exports = class AuthService {
       await transporter.sendMail(mailOptions);
       return {
         error: false,
-        message: "Se ha enviado un correo electrónico para restablecer la contraseña",
+        message:
+          "Se ha enviado un correo electrónico para restablecer la contraseña",
       };
     } catch (error) {
       throw error;
@@ -125,28 +129,33 @@ module.exports = class AuthService {
     }
   }
   // Cambio de contraseña por token
-  static async sendPasswordResetEmail(email, resetToken) {
-    try {
-      const resetLink = `${corsOrigin}/reset-password?token=${resetToken}`;
-      const mailOptions = {
-        from: "jlema1990@gmail.com",
-        to: email,
-        subject: "Recuperación de contraseña",
-        text: `¡Hola! Para restablecer tu contraseña, haz clic en el siguiente enlace: ${resetLink}`,
-      };
-
-      await transporter.sendMail(mailOptions);
-      console.log(
-        `Correo electrónico de recuperación de contraseña enviado a ${email}`
-      );
-    } catch (error) {
-      throw error;
-    }
-  }
+  // static async sendPasswordResetEmail(email, resetToken) {
+  //   try {
+  //     const resetLink = `${corsOrigin}/reset-password?token=${resetToken}`;
+  //     const mailOptions = {
+  //       from: sanitEmail,
+  //       to: email,
+  //       subject: "Recuperación de contraseña",
+  //       text: `¡Hola! Para restablecer tu contraseña, haz clic en el siguiente enlace: ${resetLink}`,
+  //     };
+  //     await transporter.sendMail(mailOptions);
+  //     console.log(
+  //       `Correo electrónico de recuperación de contraseña enviado a ${email}`
+  //     );
+  //     return {
+  //       error: false,
+  //       message:
+  //         "Se ha enviado un correo electrónico para restablecer la contraseña",
+  //     };
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
   static async updatePasswordWithToken(token, newPassword) {
     try {
       const secretKey = secret;
       const decodedToken = jwt.verify(token, secretKey);
+      console.log(decodedToken, "decodedToken");
       if (!decodedToken) {
         return {
           error: true,
@@ -171,7 +180,9 @@ module.exports = class AuthService {
   }
   static async resetPassword(userId, newPassword) {
     try {
-      let user = await Users.findById(userId);
+      const user = await Users.findById(userId);
+      console.log(user, "user before password reset"); // Add this line for logging
+
       if (!user) {
         return {
           error: true,
@@ -179,11 +190,13 @@ module.exports = class AuthService {
             "No se encontró ningún usuario con ese token de restablecimiento de contraseña.",
         };
       }
+
       user.password = newPassword;
-      await user.save();
+      const updatedUser = await user.save();
+
       return {
         error: false,
-        data: user,
+        data: updatedUser,
         message: "Contraseña actualizada correctamente.",
       };
     } catch (error) {
