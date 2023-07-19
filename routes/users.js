@@ -17,7 +17,7 @@ const {
 router.get("/", getAll);
 
 // OBTENER UN USUARIO ESPECIFICO
-router.get("/:_id", findOneUser);
+router.get("/:userId", findOneUser);
 
 // OBTENER TODOS LOS PACIENTES DE UN DOCTOR
 router.get("/patients/:doctorId", findDoctorPatients);
@@ -29,13 +29,12 @@ router.post("/new", register);
 router.post("/complete/:doctorId", completeRegister);
 
 // MODIFICAR UN USUARIO
-router.put("/update/:_id", updateUser);
+router.put("/update/:userId", updateUser);
 
 // ELIMINAR UN USUARIO
-router.delete("/delete/:_id", deleteUser);
+router.delete("/delete/:userId", deleteUser);
 
 // BORRAR UN PACIENTE DE UN DOCTOR
-router.delete("/delete/:patientId/:doctorId", removePatientFromDoctor);
-
+router.delete("/:userId/patients/:patientId", removePatientFromDoctor);
 
 module.exports = router;
