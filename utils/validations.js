@@ -22,7 +22,12 @@ function isValidEmail(email) {
 // Función para validar el formato de un ID de MongoDB
 function checkIdFormat(id) {
   if (!mongoose.isValidObjectId(id)) {
-    return { error: true, message: "El ID es inválido" };
+    return { 
+      error: true, 
+      message: "Formato de ID inválido: El ID proporcionado no tiene el formato ObjectId válido." ,
+      status: 422
+    
+    };
   }
   return { error: false };
 }

@@ -72,7 +72,9 @@ describe("User Controller", () => {
       const res = await chai.request(app).get("/api/users/123456789");
       expect(res).to.have.status(400);
       expect(res.body).to.be.an("object");
-      expect(res.body.message).to.equal("El ID es inválido");
+      expect(res.body.message).to.equal(
+        "Formato de ID inválido: El ID proporcionado no tiene el formato ObjectId válido."
+      );
     });
 
     it("debería devolver un mensaje de error si el ID no se encuentra en la base de datos", async () => {
@@ -98,7 +100,9 @@ describe("User Controller", () => {
       const res = await chai.request(app).get(`/api/users/patients/123456789`);
       expect(res).to.have.status(400);
       expect(res.body).to.be.an("object");
-      expect(res.body.message).to.equal("El ID es inválido");
+      expect(res.body.message).to.equal(
+        "Formato de ID inválido: El ID proporcionado no tiene el formato ObjectId válido."
+      );
     });
 
     it("debería devolver un mensaje de error si el ID no se encuentra en la base de datos", async () => {
@@ -243,7 +247,9 @@ describe("User Controller", () => {
     it("debería devolver un mensaje de error si el ID enviado no tiene el formato correcto", async () => {
       const res = await chai.request(app).put(`/api/users/update/123456789`);
       expect(res).to.have.status(400);
-      expect(res.body.message).to.equal("El ID es inválido");
+      expect(res.body.message).to.equal(
+        "Formato de ID inválido: El ID proporcionado no tiene el formato ObjectId válido."
+      );
     });
 
     it("debería devolver un mensaje de error si no se proporcionaron los campos correctos", async () => {
@@ -277,7 +283,9 @@ describe("User Controller", () => {
     it("debería devolver un mensaje de error si el ID enviado no tiene el formato correcto", async () => {
       const res = await chai.request(app).delete(`/api/users/delete/123456789`);
       expect(res).to.have.status(400);
-      expect(res.body.message).to.equal("El ID es inválido");
+      expect(res.body.message).to.equal(
+        "Formato de ID inválido: El ID proporcionado no tiene el formato ObjectId válido."
+      );
     });
 
     it("debería devolver un mensaje de error si el usuario no existe", async () => {
@@ -312,7 +320,9 @@ describe("User Controller", () => {
         .request(app)
         .delete(`/api/users/${userId}/patients/12345678`);
       expect(res).to.have.status(400);
-      expect(res.body.message).to.equal("El ID es inválido");
+      expect(res.body.message).to.equal(
+        "Formato de ID inválido: El ID proporcionado no tiene el formato ObjectId válido."
+      );
     });
 
     it("debería devolver un mensaje de error si el ID enviado no tiene el formato correcto", async () => {
@@ -322,7 +332,9 @@ describe("User Controller", () => {
         .request(app)
         .delete(`/api/users/12345678/patients/${patientId}`);
       expect(res).to.have.status(400);
-      expect(res.body.message).to.equal("El ID es inválido");
+      expect(res.body.message).to.equal(
+        "Formato de ID inválido: El ID proporcionado no tiene el formato ObjectId válido."
+      );
     });
 
     it("debería devolver un mensaje de error si el usuario no existe", async () => {

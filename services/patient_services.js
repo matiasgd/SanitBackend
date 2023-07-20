@@ -37,8 +37,9 @@ module.exports = class PatientService {
       if (!email || !name || !lastName) {
         return {
           error: true,
+          status: 422,
           message:
-            "La informacion de los campos para la creacion de una cuenta son incorrectos.",
+            "Información incompleta: Debes proporcionar como minimo el email, nombre y apellido para crear una cuenta.",
         };
       }
       // Validar ID
@@ -46,20 +47,18 @@ module.exports = class PatientService {
       if (validId.error) {
         return validId;
       }
+
       // validar si el doctor existe
       const doctor = await Users.findById(doctorId);
       if (!doctor) {
-        return { error: true, message: "El usuario no existe" };
-      }
-      const id = doctor._id.toString();
-      // Validar que se proporcionen todos los campos requeridos
-      if (!email || !name || !lastName) {
         return {
           error: true,
-          message:
-            "La informacion de los campos para la creacion de una cuenta son incorrectos.",
+          status: 404,
+          message: "El usuario no existe en la base de datos.",
         };
       }
+
+      const id = doctor._id;
       // Validar que el email no esté registrado
       let patient = await Patients.findOne({ email });
       // Crear un nuevo paciente
@@ -72,28 +71,37 @@ module.exports = class PatientService {
           // El médico no está asignado al paciente, lo agregamos al array de médicos
           patient.doctors.push(doctorId);
           await patient.save();
-          doctor.patients.push(patient._id.toString());
+          doctor.patients.push(patient._id);
           await doctor.save();
-          return { error: false, data: patient };
+          return {
+            error: false,
+            status: 201,
+            data: patient,
+            message:
+              "El usuario no tenia asignado al paciente pero el paciente ya se encontraba en la base de datos. Se procedio a asignar el paciente al usuario!",
+          };
         }
         return { error: true, message: "El paciente ya existe" };
       } else {
         // El paciente no existe, creamos un nuevo registro
         let patient = await Patients.create({
           ...patientDTO,
-          doctors: [doctor._id.toString()],
+          doctors: [doctor._id],
         });
-        doctor.patients.push(patient._id.toString());
+        doctor.patients.push(patient._id);
         await doctor.save();
         return {
           error: false,
+          status: 201,
           data: patient,
-          message: "El paciente fue creado exitosamente!",
+          message:
+            "El paciente no se encontraba previamente en la base de datos. El paciente fue creado y asignado exitosamente al usuario!",
         };
       }
     } catch (error) {
       return {
         error: true,
+        status: 500,
         data: error,
         message: "Hubo un problema en la creacion del paciente.",
       };
@@ -193,38 +201,86 @@ module.exports = class PatientService {
       throw err;
     }
   }
+
+  static async updatePatient(patientId, patientDTO) {
+    try {
+      const patient = await Patients.findOne({ _id: patientId });
+      // verificacion si el ID enviado por params no existe en la DB
+      if (!patient) {
+        return {
+          error: true,
+          status: 404,
+          data: patient,
+          message:  "El paciente no existe en la base de datos.",
+        };
+      }
+
+      if (patient.doctors.length > 1) {
+        return {
+          error: true,
+          status: 400,
+          data: patient,
+          message:
+            "El paciente tiene más de un médico asignado, no se puede actualizar",
+        };
+      }
+      // actualizacion si el paciente existe
+      const updatedPatient = await Patients.findOneAndUpdate(
+        { _id: patientId },
+        patientDTO,
+        { new: true }
+      );
+      return {
+        error: false,
+        status: 201,
+        data: updatedPatient,
+        message: "El paciente fue actualizado exitosamente!",
+      };
+    } catch (err) {
+      throw err;
+    }
+  }
+
   static async assignServiceToPatient(patientId, serviceId) {
     try {
       // Verificar si el paciente existe
       const patient = await Patients.findOne({ _id: patientId });
-
       if (!patient) {
-        return { error: true, data: null, message: "Paciente no encontrado" };
+        return {
+          error: true,
+          status: 404,
+          message: "El paciente no existe en la base de datos.",
+        };
       }
 
       // Verificar si el servicio existe
       const service = await Services.findOne({ _id: serviceId });
 
       if (!service) {
-        return { error: true, data: null, message: "Servicio no encontrado" };
-      }
-
-      // Verificar si el médico asignado al servicio es el mismo que el del paciente
-      const medicoId = service.doctor;
-      if (!patient.doctors.some((doctor) => doctor._id.equals(medicoId))) {
         return {
           error: true,
-          data: null,
-          message: "El médico asignado no coincide con el paciente",
+          status: 404,
+          message: "Servicio no encontrado en la base de datos.",
         };
       }
+
+      // Verificar si el paciente tiene al medico asignado
+      const userId = service.doctor;
+      if (!patient.doctors.some((doctor) => doctor._id.equals(userId))) {
+        return {
+          error: true,
+          status: 400,
+          message: "El médico no tiene asignado a al paciente",
+        };
+      }
+
       patient.services.push(serviceId);
       await patient.save();
-
       return {
         error: false,
         data: patient,
-        message: "Servicio asignado correctamente",
+        status: 201,
+        message: "Servicio asignado correctamente!",
       };
     } catch (err) {
       throw err;
@@ -265,42 +321,6 @@ module.exports = class PatientService {
         error: false,
         data: patient,
         message: "Servicio fue eliminado del paciente correctamente",
-      };
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  static async updatePatient(patientId, patientDTO) {
-    try {
-      const patient = await Patients.findOne({ _id: patientId });
-      // verificacion si el ID enviado por params no existe en la DB
-      if (!patient) {
-        return {
-          error: true,
-          data: patient,
-          message: "El paciente no existe.",
-        };
-      }
-
-      if (patient.doctors.length > 1) {
-        return {
-          error: true,
-          data: patient,
-          message:
-            "El paciente tiene más de un médico asignado, no se puede actualizar",
-        };
-      }
-      // actualizacion si el paciente existe
-      const updatedPatient = await Patients.findOneAndUpdate(
-        { _id: patientId },
-        patientDTO,
-        { new: true }
-      );
-      return {
-        error: false,
-        data: updatedPatient,
-        message: "El paciente fue actualizado exitosamente!",
       };
     } catch (err) {
       throw err;

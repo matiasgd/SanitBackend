@@ -57,17 +57,17 @@ module.exports = {
   updatePassword: async (req, res, next) => {
     try {
       const id = req.params.userId;
+      console.log(id, "id in controller");
       const { oldPassword, newPassword } = req.body;
       const result = await AuthService.updatePassword(
         id,
         oldPassword,
         newPassword
       );
-
       if (result.error) {
         return res.status(401).send(result.message);
       }
-      return res.status(200).send(result.message);
+      return res.status(201).send(result.message);
     } catch (error) {
       next(error);
     }

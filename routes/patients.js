@@ -27,13 +27,16 @@ router.post("/new/:doctorId", createPatient);
 // CREAR PACIENTES EN BULK
 router.post("/bulk/:doctorId", upload.single("file"), bulkCreatePatients);
 
+// ACTUALIZAR UN PACIENTE
+router.put("/update/:patientId", updatePatient);
+
+// ------ VER SI ASIGNAR O NO SERVICIOS A UN PACIENTE ------ //
+
 // ASIGNAR SERVICIO AL PACIENTE
 router.put("/assign/:patientId", assignServiceToPatient);
 
 // DESASIGNAR SERVICIO AL PACIENTE
 router.put("/unassign/:patientId/:serviceId", unassignServiceFromPatient);
 
-// ACTUALIZAR UN PACIENTE
-router.put("/update/:patientId", updatePatient);
 
 module.exports = router;

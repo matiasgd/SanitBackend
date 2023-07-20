@@ -100,6 +100,10 @@ module.exports = class AuthService {
   // Cambio de contraseña por usuario
   static async updatePassword(id, oldPassword, newPassword) {
     try {
+      console.log(id, "id");
+      console.log(oldPassword, "oldPassword");
+      console.log(newPassword, "newPassword");
+      // Verificar que el usuario exista
       const user = await Users.findById(id);
       if (!user) {
         return {
