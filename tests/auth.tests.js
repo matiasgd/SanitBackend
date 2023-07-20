@@ -12,24 +12,21 @@ const { generateResetToken } = require("../utils/token");
 describe("Auth Controller", () => {
   beforeEach(async () => {
     // Crea usuarios en la base de datos para las pruebas
-    const user1 = new Users({
+    const user1 = await Users.create({
       email: "user1@example.com",
       password: "password1",
     });
-    await user1.save();
-
-    const user2 = new Users({
+    const user2 = await Users.create({
       email: "user2@example.com",
       password: "password2",
     });
-    await user2.save();
 
-    const user3 = new Users({
-      email: "jlema1990@gmail.com",
-      password: "password2",
+    const user3 = await Users.create({
+      email: "user3@example.com",
+      password: "password3",
     });
-    await user3.save();
   });
+
   afterEach(async () => {
     // Elimina los usuarios creados en la base de datos después de las pruebas
     await Users.deleteMany({});
@@ -97,7 +94,7 @@ describe("Auth Controller", () => {
     });
 
     it("debería devolver un mensaje satisfactorio y enviar el email de recuperacion de password al usuario.", async () => {
-      const mail = { email: "jlema1990@gmail.com" };
+      const mail = { email: "user3@example.com" };
 
       // Crea un stub para la función findOne de Users para simular que el usuario existe
       const user = await Users.findOne({ email: mail.email });
@@ -147,4 +144,31 @@ describe("Auth Controller", () => {
   //     expect(res.text).to.equal("Contraseña actualizada exitosamente");
   //   });
   // });
+
+  describe("PUT /api/auth/newpassword/:userId", () => {
+    it("debería devolver un mensaje de error si el email no se encuentra registrado", async () => {
+      const id = "24b846de8f7f3f24400060fe";
+      const data = { newPassword: "password4", oldPassword: "password3" };
+      const res = await chai
+        .request(app)
+        .put(`/api/auth/newpassword/${id}`)
+        .send(data);
+      expect(res).to.have.status(401);
+      expect(res.body.message).to.equal("El email no se encuentra registrado");
+    });
+
+    it("debería devolver un mensaje satisfactorio y enviar el email de recuperacion de password al usuario.", async () => {
+      const user = await Users.findOne({ email: "user1@example.com" });
+      const id = user._id.toString();
+      const data = { newPassword: "password5", oldPassword: "password1" };
+      const res = await chai
+        .request(app)
+        .put(`/api/auth/newpassword/${id}`)
+        .send(data);
+      expect(res).to.have.status(201);
+      expect(res.body.message).to.equal(
+        "La contraseña se ha actualizado correctamente"
+      );
+    });
+  });
 });

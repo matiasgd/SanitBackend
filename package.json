@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "npm run server",
-    "test": "cross-env NODE_ENV=testing mocha tests/auth.tests.js",
+    "test": "cross-env NODE_ENV=testing mocha tests/patients.tests.js",
     "server": "cross-env NODE_ENV=development nodemon server.js"
   },
   "repository": {
