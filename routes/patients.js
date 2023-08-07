@@ -5,6 +5,7 @@ const {
   createPatient,
   updatePatient,
   bulkCreatePatients,
+  createPatientForm,
   assignServiceToPatient,
   unassignServiceFromPatient,
 } = require("../controllers/patient_controller");
@@ -27,6 +28,9 @@ router.post("/new/:doctorId", createPatient);
 // CREAR PACIENTES EN BULK
 router.post("/bulk/:doctorId", upload.single("file"), bulkCreatePatients);
 
+// CREAR PACIENTE POR MEDIO DE UN LINK QUE COMPLETA EL PACIENTE
+router.post("/form/:doctorId", createPatientForm);
+
 // ACTUALIZAR UN PACIENTE
 router.put("/update/:patientId", updatePatient);
 
@@ -37,6 +41,5 @@ router.put("/assign/:patientId", assignServiceToPatient);
 
 // DESASIGNAR SERVICIO AL PACIENTE
 router.put("/unassign/:patientId/:serviceId", unassignServiceFromPatient);
-
 
 module.exports = router;

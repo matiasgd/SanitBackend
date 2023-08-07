@@ -39,6 +39,7 @@ module.exports = {
       next(err);
     }
   },
+
   bulkCreatePatients: async (req, res, next) => {
     try {
       const doctorId = req.params.doctorId.toString();
@@ -48,6 +49,31 @@ module.exports = {
         return res.status(400).send(result.message);
       }
       res.status(200).send(result);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  createPatientForm: async (req, res, next) => {
+    try {
+      const doctorId = req.params.doctorId;
+      const patientEmail = req.body.email;
+
+      const result = await PatientsService.sendPatientForm(
+        doctorId,
+        patientEmail
+      );
+      if (result.error) {
+        return res.status(result.status).send({
+          data: result.data,
+          message: result.message,
+        });
+      }
+      console.log(result);
+      res.status(result.status).send({
+        data: result.data,
+        message: result.message,
+      });
     } catch (err) {
       next(err);
     }
@@ -125,6 +151,4 @@ module.exports = {
       next(err);
     }
   },
-
-
 };

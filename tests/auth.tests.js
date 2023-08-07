@@ -7,7 +7,6 @@ const { Users } = require("../db_models");
 const sinon = require("sinon");
 const transporter = require("../config/transporter");
 const { corsOrigin, sanitEmail } = require("../config");
-const { generateResetToken } = require("../utils/token");
 
 describe("Auth Controller", () => {
   beforeEach(async () => {
@@ -125,25 +124,6 @@ describe("Auth Controller", () => {
     });
   });
 
-  // describe("POST /api/auth/reset-password", () => {
-  //   it("debería devolver un mensaje satisfactorio y enviar el email de recuperacion de password al usuario.", async () => {
-  //     const mail = { email: "jlema1990@gmail.com" };
-  //     const user = await Users.findOne({ email: mail.email });
-
-  //     console.log(user, "user in test"); // Add this line for logging
-
-  //     const token = generateResetToken(user._id);
-  //     const newPassword = "password1";
-
-  //     const res = await chai
-  //       .request(app)
-  //       .post(`/api/auth/reset-password`)
-  //       .send({ token, newPassword });
-
-  //     expect(res).to.have.status(201);
-  //     expect(res.text).to.equal("Contraseña actualizada exitosamente");
-  //   });
-  // });
 
   describe("PUT /api/auth/newpassword/:userId", () => {
     it("debería devolver un mensaje de error si el email no se encuentra registrado", async () => {

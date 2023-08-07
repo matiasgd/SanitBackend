@@ -7,6 +7,9 @@ const {
   isValidEmail,
   checkIdFormat,
 } = require("../utils/validations");
+const { corsOrigin, sanitEmail } = require("../config");
+const transporter = require("../config/transporter");
+const { generateResetToken } = require("../utils/token");
 
 module.exports = class PatientService {
   static async findPatients() {
@@ -202,6 +205,60 @@ module.exports = class PatientService {
     }
   }
 
+  static async sendPatientForm(doctorId, patientEmail) {
+    try {
+      // validar si ya existe el perfil del paciente
+      const patient = await Patients.findOne({ email: patientEmail });
+      if (patient) {
+        return {
+          error: true,
+          status: 400,
+          message: "El paciente ya tiene un perfil creado.",
+        };
+      }
+
+      // Validar ID
+      const validId = checkIdFormat(doctorId);
+      if (validId.error) {
+        return validId;
+      }
+
+      // validar si el doctor existe
+      const doctor = await Users.findById(doctorId);
+      if (!doctor) {
+        return {
+          error: true,
+          status: 404,
+          message: "El usuario no existe en la base de datos.",
+        };
+      }
+
+      let name = doctor.name;
+      let lastName = doctor.lastName;
+      const token = generateResetToken(doctorId);
+      const loginForm = `${corsOrigin}/register?token=${token}`;
+      const mailOptions = {
+        from: sanitEmail,
+        to: patientEmail,
+        subject: "Sanit: Formulario de paciente",
+        text: `¡Hola soy ${name} ${lastName}! Por favor completa tu perfil para poder brindarte la mejor atencion, haz clic en el siguiente enlace para acceder al formulario: ${loginForm}`,
+      };
+      await transporter.sendMail(mailOptions);
+      return {
+        error: false,
+        status: 201,
+        message: "Se ha enviado un correo electrónico con el formulario",
+      };
+    } catch (error) {
+      return {
+        error: true,
+        status: 500,
+        data: error,
+        message: "Hubo un problema en la creacion del paciente.",
+      };
+    }
+  }
+
   static async updatePatient(patientId, patientDTO) {
     try {
       const patient = await Patients.findOne({ _id: patientId });
@@ -211,7 +268,7 @@ module.exports = class PatientService {
           error: true,
           status: 404,
           data: patient,
-          message:  "El paciente no existe en la base de datos.",
+          message: "El paciente no existe en la base de datos.",
         };
       }
 
@@ -240,6 +297,8 @@ module.exports = class PatientService {
       throw err;
     }
   }
+
+  // ASIGNACION DE SERVICIOS PARA PACIENTES RECURRENTES
 
   static async assignServiceToPatient(patientId, serviceId) {
     try {

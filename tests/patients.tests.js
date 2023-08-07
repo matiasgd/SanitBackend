@@ -1,14 +1,17 @@
 const chai = require("chai");
 const chaiHttp = require("chai-http");
+const sinon = require("sinon");
 const { expect } = chai;
 chai.use(chaiHttp);
 const app = require("../server");
 const { Users, Patients, Services } = require("../db_models");
 const mongoose = require("mongoose");
 const { describe } = require("mocha");
+const transporter = require("../config/transporter");
+const { corsOrigin, sanitEmail } = require("../config");
 
 describe("Patient Controller", () => {
-  let userId; // Variable para almacenar el ID del usuario  
+  let userId; // Variable para almacenar el ID del usuario
 
   beforeEach(async () => {
     // Crear un nuevo usuario
@@ -66,7 +69,6 @@ describe("Patient Controller", () => {
     await Services.deleteMany({});
   });
 
-
   // -------------- TESTS DE GET : BUSQUEDA DE DATOS -------------- //
 
   describe("GET api/patients/", () => {
@@ -77,7 +79,7 @@ describe("Patient Controller", () => {
       expect(res.body.patients.length).to.equal(2);
     });
   });
-  
+
   // -------------- TESTS DE POST:CREAR UN PACIENTE -------------- //
 
   describe("POST api/patients/new", async () => {
@@ -191,9 +193,60 @@ describe("Patient Controller", () => {
     });
   });
 
-   // -------------- TESTS DE PUT: MODIFICAR UN PACIENTE -------------- //
+  describe("POST /api/patients/form/:doctorId", () => {
+    it("debería devolver un mensaje de error si el email ya se encuentra registrado", async () => {
+      const data = { email: "paciente1@gmail.com" };
+      const user = await Users.findOne();
+      const userId = user._id.toString();
+      const res = await chai
+        .request(app)
+        .post(`/api/patients/form/${userId}`)
+        .send(data);
 
-   describe("PUT api/patients/update/:patientId", async () => {
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.equal(
+        "El paciente ya tiene un perfil creado."
+      );
+    });
+
+    it("debería devolver un mensaje satisfactorio y enviar el email de registro al usuario.", async () => {
+      const data = { email: "jlema1990@gmail.com" };
+      // Crea un stub para la función findOne de Users para simular que el usuario existe
+      const user = await Users.findOne();
+      const userId = user._id.toString();
+
+      const findOneStub = sinon
+        .stub(Users, "findOne")
+        .resolves({ _id: userId });
+
+      // Crea un stub para la función sendMail del transporter para simular el envío de correo electrónico
+      const sendMailStub = sinon.stub(transporter, "sendMail").resolves();
+
+      const res = await chai
+        .request(app)
+        .post(`/api/patients/form/${userId}`)
+        .send(data);
+      expect(res).to.have.status(201);
+      expect(res.body.message).to.equal(
+        "Se ha enviado un correo electrónico con el formulario"
+      );
+
+      // // Verifica que la función findOne se haya llamado con el email correcto
+      // sinon.assert.calledOnceWithExactly(findOneStub, { email: data.email });
+
+      // // Verifica que la función sendMail se haya llamado con los argumentos correctos
+      // sinon.assert.calledOnceWithExactly(sendMailStub, {
+      //   from: sanitEmail,
+      //   to: data.email,
+      //   subject: "Sanit: Formulario de paciente",
+      //   text: sinon.match(/completar el perfil/),
+      // });
+    });
+  });
+
+  // -------------- TESTS DE PUT: MODIFICAR UN PACIENTE -------------- //
+
+  describe("PUT api/patients/update/:patientId", async () => {
     it("El paciente no existe en la base de datos", async () => {
       const patientId = "00000c5b099d75204c5ccb00";
       const data = { lastName: "Rodriguez" };
@@ -302,6 +355,4 @@ describe("Patient Controller", () => {
       expect(res.body.patient._id).to.equal(patientId.toString());
     });
   });
-
- 
 });
