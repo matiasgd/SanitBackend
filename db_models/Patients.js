@@ -2,19 +2,38 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const schema = Schema({
-  email: { type: String, required: true, unique: true },
-  govermentId: { type: String },
+  // datos obligatorios de registro
   name: { type: String, required: true },
   lastName: { type: String, required: true },
+  govermentId: { type: String },
   birthdate: { type: Date },
-  age: { type: Number }, // Nueva propiedad para almacenar la edad
+  age: { type: Number }, // Calculado en el hook pre-save
+  nationality: { type: String },
+  email: { type: String, required: true, unique: true },
   gender: { type: String },
+  // phone number
+  codCountry: { type: String },
+  codArea: { type: String },
   cellphone: { type: String },
+  // address
   country: { type: String },
-  province: { type: String },
+  state: { type: String },
   city: { type: String },
-  address: { type: String },
+  street: { type: String },
+  streetNumber: { type: String },
+  addressType: { type: String, enum: ["House", "Appartment"] },
+  addressFloor: { type: String },
+  zipCode: { type: String },
+  // datos seguro medico
   healthInsurance: { type: String },
+  healthInsuranceNumber: { type: String },
+  privateHealthInsurance: { type: String },
+  privateHealthInsuranceNumber: { type: String },
+  // datos de contacto de emergencia
+  contactName: { type: String },
+  contactLastName: { type: String },
+  contactRelationship: { type: String },
+  contactPhone: { type: String },
   // datos de doctor
   doctors: [
     {
@@ -51,14 +70,17 @@ schema.pre("save", function (next) {
     const birthMonth = birthdate.getMonth() + 1;
     const currentDay = currentDate.getDate();
     const birthDay = birthdate.getDate();
-    
-    if (currentMonth < birthMonth || (currentMonth === birthMonth && currentDay < birthDay)) {
+
+    if (
+      currentMonth < birthMonth ||
+      (currentMonth === birthMonth && currentDay < birthDay)
+    ) {
       // Restar un año si el cumpleaños no ha pasado
       this.age = age - 1;
     } else {
       this.age = age;
     }
-  }  
+  }
   next();
 });
 
