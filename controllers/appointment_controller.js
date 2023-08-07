@@ -11,11 +11,13 @@ module.exports = {
       const appointment = await AppointmentsService.findAppointmentById(id);
 
       if (appointment.error) {
-        return res.status(400).send(appointment.message);
+        return res.status(appointment.status).send({
+          message: appointment.message,
+        });
       }
-      res.status(201).send({
+      res.status(appointment.status).send({
         appointment: appointment.data,
-        message: "El turno fue encontrado exitosamente",
+        message: appointment.message,
       });
     } catch (err) {
       next(err);
@@ -100,11 +102,11 @@ module.exports = {
         month,
         year
       );
-      console.log(updatedMonthlyMetrics)
+      console.log(updatedMonthlyMetrics);
 
       // Actualiza el modelo de métricas diarias
       const updateDailyMetrics = await DailyMetricsService.cancelations(
-        appointmentId,
+        appointmentId
       );
 
       if (updatedMonthlyMetrics.error || updateDailyMetrics.error) {
@@ -112,7 +114,6 @@ module.exports = {
           .status(400)
           .send(updatedMonthlyMetrics.message || updateDailyMetrics.message);
       }
-
 
       res.status(201).send({
         appointment: updatedAppointment.data,

@@ -4,6 +4,7 @@ const moment = require("moment");
 const { checkIdFormat } = require("../utils/validations");
 
 module.exports = class AppointmentsService {
+
   static async findAppointmentById(appointmentId) {
     try {
       // Validar ID
@@ -16,14 +17,19 @@ module.exports = class AppointmentsService {
       if (!appointment) {
         return {
           error: true,
-          message: "La cita no existe",
+          status: 404,
+          message: "La cita no existe en la base de datos",
         };
       }
-      return { error: false, data: appointment };
+      return { 
+        error: false, 
+        status: 201,
+        data: appointment };
     } catch (error) {
       return { error: true, data: error };
     }
   }
+  
   static async getAppointmentByDoctorId(doctorId) {
     try {
       // Validar ID

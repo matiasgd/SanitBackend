@@ -10,7 +10,7 @@ const schema = Schema({
     enum: ["Presencial", "Virtual", "Ambos"],
   },
   currency: {
-    type: String,
+    type: String, 
     required: true,
     enum: ["ARS", "USD"],
   },
