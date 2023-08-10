@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getPatients,
   createPatient,
+  seedPatients,
   updatePatient,
   bulkCreatePatients,
   createPatientForm,
@@ -24,6 +25,9 @@ router.get("/", getPatients);
 
 // CREAR PACIENTES
 router.post("/new/:doctorId", createPatient);
+
+// SEED DE PACIENTES
+router.post("/seed/:doctorId", seedPatients);
 
 // CREAR PACIENTES EN BULK
 router.post("/bulk/:doctorId", upload.single("file"), bulkCreatePatients);

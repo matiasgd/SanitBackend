@@ -1,5 +1,7 @@
-const { Patients } = require("../db_models");
+const { Users, Patients } = require("../db_models");
 const PatientsService = require("../services/patient_services");
+const Chance = require("chance");
+const chance = new Chance();
 
 module.exports = {
   getPatients: async (req, res, next) => {
@@ -37,6 +39,81 @@ module.exports = {
       });
     } catch (err) {
       next(err);
+    }
+  },
+
+  seedPatients: async (req, res, next) => {
+    try {
+      const doctorId = req.params.doctorId;
+      const numPatients = req.body.numPatients;
+      console.log(numPatients, "numPatients");
+      const user = await Users.findById(doctorId);
+      const patients = [];
+
+      for (let i = 0; i < numPatients; i++) {
+        const patientData = {
+          name: chance.first(),
+          lastName: chance.last(),
+          govermentId: chance.string({ length: 8, alpha: true, numeric: true }),
+          birthdate: chance.birthday({
+            year: chance.year({ min: 1950, max: 2000 }),
+          }),
+          age: chance.age({ type: "adult" }),
+          nationality: chance.country(),
+          email: chance.email(),
+          gender: chance.pickone(["Male", "Female", "Other"]),
+          codCountry: chance.country(),
+          codArea: chance.integer({ min: 100, max: 999 }).toString(),
+          cellphone: chance.phone(),
+          country: chance.country(),
+          state: chance.state(),
+          city: chance.city(),
+          street: chance.street(),
+          streetNumber: chance.integer({ min: 1, max: 100 }).toString(),
+          addressType: chance.pickone(["House", "Appartment"]),
+          addressFloor: chance.integer({ min: 1, max: 20 }).toString(),
+          zipCode: chance.zip(),
+          healthInsurance: chance.company(),
+          healthInsuranceNumber: chance.string({
+            length: 10,
+            alpha: true,
+            numeric: true,
+          }),
+          privateHealthInsurance: chance.company(),
+          privateHealthInsuranceNumber: chance.string({
+            length: 10,
+            alpha: true,
+            numeric: true,
+          }),
+          contactName: chance.first(),
+          contactLastName: chance.last(),
+          contactRelationship: chance.pickone([
+            "Spouse",
+            "Parent",
+            "Sibling",
+            "Friend",
+          ]),
+          contactPhone: chance.phone(),
+          doctors: [doctorId], // Asociar al doctor correspondiente
+        };
+        const patient = new Patients(patientData);
+        patients.push(patient); // Agregar el objeto a la lista de pacientes
+        user.patients.push(patient); // Agregar el paciente al usuario
+      }
+
+      // Guardar los pacientes en la base de datos
+      await Promise.all(patients.map((patient) => patient.save()));
+      await user.save();
+      console.log(patients, "patients");
+      res.status(201).json({
+        message: `${numPatients} pacientes generados y asociados al doctor.`,
+        data: patients, // Utilizar el array de pacientes generado
+      });
+    } catch (error) {
+      console.error("Error al guardar pacientes:", error);
+      res.status(500).json({
+        error: "Error al generar pacientes.",
+      });
     }
   },
 
