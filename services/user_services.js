@@ -57,9 +57,7 @@ module.exports = class UsersService {
       const patientsInfo = await Patients.find({ _id: { $in: patientIds } })
         .populate("doctors", "name lastName")
         .select("-previousDoctors -previousPatients");
-      if (patientsInfo.length === 0) {
-        return { error: true, message: "No se encontraron pacientes" };
-      }
+
       return { error: false, data: patientsInfo };
     } catch (error) {
       return { error: true, data: error };
