@@ -8,20 +8,31 @@ module.exports = class ServicesService {
     try {
       // Validar ID
       const validId = checkIdFormat(id);
-      if (validId.error) {
+      if (validId.error) {        
         return validId;
       }
       const user = await Users.findById(id);
       // Verificar si el usuario existe
       if (!user) {
-        return { error: true, message: "El usuario no existe" };
+        return { 
+          status: 404,
+          error: true, 
+          message: "El usuario no existe" };
       }
       // Verificar si el usuario es un doctor
-      const services = await Services.find({ doctor: id });
+      const services = await Services.find({ doctor: id });      
       if (!services) {
-        return { error: true, message: "No se encontraron servicios" };
+        return {
+          status: 404,
+          error: true,
+          message: "No se encontraron servicios",
+        };
       }
-      return { error: false, data: services };
+      return {
+        status: 201,
+        error: false,
+        data: services,
+      };
     } catch (error) {
       return {
         error: true,
@@ -31,9 +42,10 @@ module.exports = class ServicesService {
   }
   static async createService(doctorId, serviceDTO) {
     try {
-      const { name, duration, type, price, category } = serviceDTO;
+      const { name, duration, type, price, currency, category, description } =
+        serviceDTO;
       // validar que los campos obligatorios no esten vacios
-      if (!name || !duration || !type || !price || !category) {
+      if (!name || !duration || !type || !price || !currency || !category) {
         return { error: true, message: "Faltan campos obligatorios" };
       }
       // Validar que el tipo y la categoria sean validos
@@ -53,13 +65,16 @@ module.exports = class ServicesService {
       if (!doctor) {
         return { error: true, message: "Médico no encontrado" };
       }
+
       // Crear el nuevo servicio
       const newService = new Services({
         name,
         duration,
         type,
         price,
+        currency,
         category,
+        description,
         doctor,
       });
       // Guardar el servicio en la base de datos
@@ -67,6 +82,7 @@ module.exports = class ServicesService {
       return {
         error: false,
         data: createdService,
+        message: "El servicio fue creado exitosamente!",
       };
     } catch (error) {
       return { error: true, data: error };
@@ -128,7 +144,7 @@ module.exports = class ServicesService {
       const removedService = await Services.findOneAndDelete({
         _id: serviceId,
         doctor: doctorId,
-      })
+      });
       // Verificar si el servicio existe
       if (!removedService) {
         return {

@@ -4,16 +4,16 @@ module.exports = {
   getMyServices: async (req, res, next) => {
     try {
       const id = req.params._id;
-      const services = await ServicesService.getMyServices(id);
-      if (services.error) {
-        return res
-          .status(404)
-          .send("No se encontraron servicios para este usuario");
-      }
-      res.status(201).send({
-        services: services,
-        message: "Los servicios se han encontrado!",
-      });
+      const result = await ServicesService.getMyServices(id);
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
     } catch (err) {
       next(err);
     }
@@ -23,17 +23,16 @@ module.exports = {
       const doctorId = req.params.doctorId;
       const serviceDTO = { ...req.body };
       // Crear el nuevo servicio
-      const createdService = await ServicesService.createService(
-        doctorId,
-        serviceDTO
-      );
-      if (createdService.error) {
-        return res.status(400).send(createdService.message);
-      }
-      res.status(201).send({
-        service: createdService,
-        message: "El servicio fue creado correctamente!",
-      });
+      const result = await ServicesService.createService(doctorId, serviceDTO);
+      result.error
+        ? res.status(400).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
     } catch (err) {
       next(err);
     }

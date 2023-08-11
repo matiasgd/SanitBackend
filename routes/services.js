@@ -19,6 +19,6 @@ router.post("/new/:doctorId", createService);
 router.put("/update/:doctorId/:serviceId", updateService);
 
 // BORRAR UN SERVICIO
-router.delete("/delete/:doctorId/:serviceId", deleteService)
+router.delete("/delete/:doctorId/:serviceId", deleteService);
 
 module.exports = router;

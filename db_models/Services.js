@@ -7,23 +7,24 @@ const schema = Schema({
   type: {
     type: String,
     required: true,
-    enum: ["Presencial", "Virtual", "Ambos"],
+    enum: ["In person", "Online", "Both"],
   },
   currency: {
-    type: String, 
+    type: String,
     required: true,
     enum: ["ARS", "USD"],
   },
   price: { type: Number, required: true, min: 0 },
-  USDPrice: { type: Number,  },
+  USDPrice: { type: Number },
   category: {
     type: String,
     required: true,
     enum: ["Particular", "Prepaga", "Obra social", "Otro"],
   },
-  description: { type: String, required: true },
+  insurance: { type: String },
+  description: { type: String },
   createdAt: { type: Date, default: Date.now() },
-  // relacion con otras colecciones  
+  // relacion con otras colecciones
   doctor: { type: Schema.Types.ObjectId, ref: "users", required: true },
 });
 

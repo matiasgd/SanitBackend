@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const schema = Schema({
+  addressName: { type: String, required: true },
   doctor: { type: Schema.Types.ObjectId, ref: "users" },
-  street: { type: String, required: true },
-  number: { type: Number, required: true },
+  street: { type: String },
+  number: { type: Number },
   floor: { type: Number },
   addressType: { type: String },
   webAddress: { type: String },
