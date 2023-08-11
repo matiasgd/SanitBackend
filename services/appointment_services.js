@@ -2,6 +2,8 @@ const { Appointments, Patients, Users } = require("../db_models");
 const mongoose = require("mongoose");
 const moment = require("moment");
 const { checkIdFormat } = require("../utils/validations");
+const validTypes = ["Presencial", "Virtual", "Ambos"];
+const validCategories = ["Particular", "Prepaga", "Obra social", "Otro"];
 
 module.exports = class AppointmentsService {
 

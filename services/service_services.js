@@ -1,6 +1,5 @@
 const { Users, Services, Patients } = require("../db_models");
-const validTypes = ["Presencial", "Virtual", "Ambos"];
-const validCategories = ["Particular", "Prepaga", "Obra social", "Otro"];
+
 const { checkIdFormat } = require("../utils/validations");
 
 module.exports = class ServicesService {
@@ -72,18 +71,15 @@ module.exports = class ServicesService {
   }
   static async createService(doctorId, serviceDTO) {
     try {
-      const { name, duration, type, price, currency, category, description } =
-        serviceDTO;
+      const { name, hours, minutes, price, currency, description } = serviceDTO;
+      const duration = hours * 60 + minutes;
       // validar que los campos obligatorios no esten vacios
-      if (!name || !duration || !type || !price || !currency || !category) {
-        return { error: true, message: "Faltan campos obligatorios" };
-      }
-      // Validar que el tipo y la categoria sean validos
-      if (!validTypes.includes(type)) {
-        return { error: true, message: "El tipo de servicio es invalido!" };
-      }
-      if (!validCategories.includes(category)) {
-        return { error: true, message: "El tipo de categoria es invalida!" };
+      if (!name || !duration || !price || !currency) {
+        return {
+          status: 400,
+          error: true,
+          message: "Faltan campos obligatorios",
+        };
       }
       // validar ID
       const validId = checkIdFormat(doctorId);
@@ -93,23 +89,26 @@ module.exports = class ServicesService {
       // Verificar si el médico existe
       const doctor = await Users.findOne({ _id: doctorId });
       if (!doctor) {
-        return { error: true, message: "Médico no encontrado" };
+        return {
+          status: 404,
+          error: true,
+          message: "Médico no encontrado",
+        };
       }
 
       // Crear el nuevo servicio
       const newService = new Services({
         name,
+        description,
         duration,
-        type,
         price,
         currency,
-        category,
-        description,
         doctor,
       });
       // Guardar el servicio en la base de datos
       const createdService = await newService.save();
       return {
+        status: 201,
         error: false,
         data: createdService,
         message: "El servicio fue creado exitosamente!",

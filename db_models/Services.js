@@ -3,12 +3,8 @@ const { Schema } = mongoose;
 
 const schema = Schema({
   name: { type: String, required: true },
+  description: { type: String },
   duration: { type: Number, required: true, min: 0 },
-  type: {
-    type: String,
-    required: true,
-    enum: ["In person", "Online", "Both"],
-  },
   currency: {
     type: String,
     required: true,
@@ -16,16 +12,10 @@ const schema = Schema({
   },
   price: { type: Number, required: true, min: 0 },
   USDPrice: { type: Number },
-  category: {
-    type: String,
-    required: true,
-    enum: ["Particular", "Prepaga", "Obra social", "Otro"],
-  },
-  insurance: { type: String },
-  description: { type: String },
   createdAt: { type: Date, default: Date.now() },
   // relacion con otras colecciones
   doctor: { type: Schema.Types.ObjectId, ref: "users", required: true },
+  status: { type: Boolean, default: true },
 });
 
 schema.plugin(require("mongoose-autopopulate"));

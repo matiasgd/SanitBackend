@@ -18,9 +18,28 @@ const schema = Schema({
   address: { type: Schema.Types.ObjectId, ref: "addresses", required: true },
   service: { type: Schema.Types.ObjectId, ref: "services", required: true },
   // datos de pago
-  paymentMethod: { type: String, enum: ["Efectivo", "Tarjeta de credito", "Tarjeta de debito"], required: true },
-  paymentStatus: { type: String, enum: ["Pendiente", "Completado"], required: true, default: "Pendiente" },
+  paymentMethod: {
+    type: String,
+    enum: ["Efectivo", "Tarjeta de credito", "Tarjeta de debito"],
+    required: true,
+  },
+  paymentStatus: {
+    type: String,
+    enum: ["Pendiente", "Completado"],
+    required: true,
+    default: "Pendiente",
+  },
   paymentDate: { type: Date, default: null },
+  category: {
+    type: String,
+    required: true,
+    enum: ["Particular", "Prepaga", "Obra social", "Otro"],
+  },
+  type: {
+    type: String,
+    required: true,
+    enum: ["In person", "Online", "Both"],
+  },
 });
 
 // Agrega el hook para actualizar la fecha del cambio en operaciones de actualización
@@ -31,13 +50,9 @@ schema.pre("findOneAndUpdate", function (next) {
     this._update.paymentDate = new Date();
   }
   next();
-})
-
+});
 
 schema.plugin(require("mongoose-autopopulate"));
 const model = mongoose.model("appointments", schema);
 
 module.exports = model;
-
-
-
