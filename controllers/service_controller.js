@@ -43,7 +43,7 @@ module.exports = {
       // Crear el nuevo servicio
       const result = await ServicesService.createService(doctorId, serviceDTO);
       result.error
-        ? res.status(400).send({
+        ? res.status(result.status).send({
             data: result.data,
             message: result.message,
           })
