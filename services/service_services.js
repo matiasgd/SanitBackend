@@ -4,23 +4,53 @@ const validCategories = ["Particular", "Prepaga", "Obra social", "Otro"];
 const { checkIdFormat } = require("../utils/validations");
 
 module.exports = class ServicesService {
+  static async findOneService(id) {
+    try {
+      // Validar ID
+      const validId = checkIdFormat(id);
+      if (validId.error) {
+        return validId;
+      }
+      const service = await Services.findById(id);
+      // Verificar si el usuario existe
+      if (!service) {
+        return {
+          status: 404,
+          error: true,
+          message: "El servicio no existe",
+        };
+      }
+      return {
+        status: 201,
+        error: false,
+        data: service,
+      };
+    } catch (error) {
+      return {
+        error: true,
+        data: error,
+      };
+    }
+  }
+
   static async getMyServices(id) {
     try {
       // Validar ID
       const validId = checkIdFormat(id);
-      if (validId.error) {        
+      if (validId.error) {
         return validId;
       }
       const user = await Users.findById(id);
       // Verificar si el usuario existe
       if (!user) {
-        return { 
+        return {
           status: 404,
-          error: true, 
-          message: "El usuario no existe" };
+          error: true,
+          message: "El usuario no existe",
+        };
       }
       // Verificar si el usuario es un doctor
-      const services = await Services.find({ doctor: id });      
+      const services = await Services.find({ doctor: id });
       if (!services) {
         return {
           status: 404,

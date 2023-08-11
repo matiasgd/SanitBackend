@@ -1,6 +1,24 @@
 const ServicesService = require("../services/service_services");
 
 module.exports = {
+  findOneService: async (req, res, next) => {
+    try {
+      const serviceId = req.params.serviceId;
+      const result = await ServicesService.findOneService(serviceId);
+      if (result.error) {
+        return res.status(result.status).send({
+          data: result.data,
+          message: result.message,
+        });
+      }
+      return res.status(result.status).send({
+        data: result.data,
+        message: result.message,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
   getMyServices: async (req, res, next) => {
     try {
       const id = req.params._id;

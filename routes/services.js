@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   getMyServices,
+  findOneService,
   createService,
   updateService,
   deleteService,
@@ -9,8 +10,11 @@ const {
 
 //-----------RUTAS GENERALES-------------//
 
+// OBTENER UN SERVICIO ESPECIFICO
+router.get("/:serviceId", findOneService);
+
 // OBTENER OBTENER MIS SERVICIOS
-router.get("/:_id", getMyServices);
+router.get("/user/:_id", getMyServices);
 
 // CREAR UN NUEVO SERVICO
 router.post("/new/:doctorId", createService);
