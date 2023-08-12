@@ -71,10 +71,35 @@ module.exports = class ServicesService {
   }
   static async createService(doctorId, serviceDTO) {
     try {
-      const { name, hours, minutes, price, currency, description } = serviceDTO;
+      const {
+        serviceName,
+        description,
+        hours,
+        minutes,
+        currency,
+        priceInitialDate,
+        priceDuration,
+        priceValue,
+      } = serviceDTO;
+
+      // ajustes para convertir el precio en objeto
+      const cleanedServiceName = serviceName.replace(/\s+/g, "_");
+      const randomSuffix = Math.floor(Math.random() * 1000);
+      const currentDate = new Date();
+      const initialDateFormatted = new Date(priceInitialDate);
+      const price = {
+        name: `${cleanedServiceName}_${randomSuffix}_${currentDate
+          .toISOString()
+          .replace(/[-:.]/g, "")}`,
+        price: priceValue,
+        createdAt: Date.now(),
+        expireAt:
+          initialDateFormatted.getTime() + priceDuration * 24 * 60 * 60 * 1000,
+      };
+
       const duration = hours * 60 + minutes;
       // validar que los campos obligatorios no esten vacios
-      if (!name || !duration || !price || !currency) {
+      if (!serviceName || !duration || !price || !currency) {
         return {
           status: 400,
           error: true,
@@ -98,7 +123,7 @@ module.exports = class ServicesService {
 
       // Crear el nuevo servicio
       const newService = new Services({
-        name,
+        serviceName,
         description,
         duration,
         price,
