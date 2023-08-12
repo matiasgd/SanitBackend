@@ -49,13 +49,6 @@ const schema = Schema({
       //autopopulate: true,
     },
   ],
-  services: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "services",
-      //autopopulate: true,
-    },
-  ],
 });
 
 // Hook para calcular la edad antes de guardar

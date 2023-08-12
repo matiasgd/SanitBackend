@@ -101,6 +101,7 @@ module.exports = {
       next(err);
     }
   },
+  
   deleteService: async (req, res, next) => {
     try {
       const serviceId = req.params.serviceId;
