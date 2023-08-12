@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const schema = Schema({
-  serviceName: { type: String, required: true, unique: true },
+  serviceName: { type: String, required: true },
   description: { type: String },
   duration: { type: Number, required: true, min: 0 },
   currency: {
@@ -11,7 +11,7 @@ const schema = Schema({
     enum: ["ARS", "USD"],
     default: "ARS",
   },
-  price: { type: Object, required: true },
+  price: { type: Array, required: true },
   USDPrice: { type: Number },
   createdAt: { type: Date, default: Date.now() },
   // relacion con otras colecciones
