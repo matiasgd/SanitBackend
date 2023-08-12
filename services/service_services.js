@@ -174,10 +174,11 @@ module.exports = class ServicesService {
       ).populate("doctor");
 
       if (!updatedService) {
-        return { 
+        return {
           status: 400,
-          error: true, 
-          message: "No se pudo actualizar el servicio" };
+          error: true,
+          message: "No se pudo actualizar el servicio",
+        };
       }
       return {
         status: 201,
@@ -257,10 +258,12 @@ module.exports = class ServicesService {
         };
       }
       // Borrar el servicio si el doctor existe
-      const removedService = await Services.findOneAndDelete({
-        _id: serviceId,
-        doctor: doctorId,
-      });
+      const removedService = await Services.findOneAndUpdate(
+        { _id: serviceId },
+        {status: false},
+        { new: true }
+      ).populate("doctor");
+
       // Verificar si el servicio existe
       if (!removedService) {
         return {
@@ -269,11 +272,6 @@ module.exports = class ServicesService {
           message: "Servicio no encontrado",
         };
       }
-      // Remover el servicio del array de pacientes
-      await Patients.updateMany(
-        { doctors: doctorId },
-        { $pull: { services: serviceId } }
-      );
       return {
         error: false,
         data: removedService,

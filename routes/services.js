@@ -24,9 +24,9 @@ router.post("/new/:doctorId", createService);
 router.put("/:serviceId/doctor/:doctorId", updateService);
 
 // MODIFICAR EL PRECIO DE UN SERVICIO
-router.put("/:serviceId/doctor/:doctorId/price",updateServicePrice);
+router.put("/:serviceId/doctor/:doctorId/price", updateServicePrice);
 
 // BORRAR UN SERVICIO
-router.delete("/delete/:doctorId/:serviceId", deleteService);
+router.delete("/:serviceId/doctor/:doctorId", deleteService);
 
 module.exports = router;
