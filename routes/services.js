@@ -5,6 +5,7 @@ const {
   findOneService,
   createService,
   updateService,
+  updateServicePrice,
   deleteService,
 } = require("../controllers/service_controller.js");
 
@@ -20,7 +21,10 @@ router.get("/user/:_id", getMyServices);
 router.post("/new/:doctorId", createService);
 
 // MODIFICAR SERVICIO EXISTENTE
-router.put("/update/:doctorId/:serviceId", updateService);
+router.put("/:serviceId/doctor/:doctorId", updateService);
+
+// MODIFICAR EL PRECIO DE UN SERVICIO
+router.put("/:serviceId/doctor/:doctorId/price",updateServicePrice);
 
 // BORRAR UN SERVICIO
 router.delete("/delete/:doctorId/:serviceId", deleteService);

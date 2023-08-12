@@ -77,6 +77,30 @@ module.exports = {
       next(err);
     }
   },
+  updateServicePrice: async (req, res, next) => {
+    try {
+      const serviceId = req.params.serviceId;
+      const doctorId = req.params.doctorId;
+      const priceDTO = { ...req.body };
+      // Crear el nuevo servicio
+      const result = await ServicesService.updatePrice(
+        serviceId,
+        doctorId,
+        priceDTO
+      );
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
+    } catch (err) {
+      next(err);
+    }
+  },
   deleteService: async (req, res, next) => {
     try {
       const serviceId = req.params.serviceId;

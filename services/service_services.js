@@ -1,5 +1,4 @@
 const { Users, Services, Patients } = require("../db_models");
-
 const { checkIdFormat } = require("../utils/validations");
 
 module.exports = class ServicesService {
@@ -126,7 +125,7 @@ module.exports = class ServicesService {
         serviceName,
         description,
         duration,
-        price,
+        price: [price],
         currency,
         doctor,
       });
@@ -152,12 +151,20 @@ module.exports = class ServicesService {
       // verificar doctor
       const doctor = await Users.findOne({ _id: doctorId });
       if (!doctor) {
-        return { error: true, message: "Médico no encontrado" };
+        return {
+          status: 404,
+          error: true,
+          message: "Médico no encontrado",
+        };
       }
       // verificar servicio
       const service = await Services.findOne({ _id: serviceId });
       if (!service) {
-        return { error: true, message: "Servicio no encontrado" };
+        return {
+          status: 404,
+          error: true,
+          message: "Servicio no encontrado",
+        };
       }
       // actualizacion si el paciente existe
       const updatedService = await Services.findOneAndUpdate(
@@ -167,9 +174,64 @@ module.exports = class ServicesService {
       ).populate("doctor");
 
       if (!updatedService) {
-        return { error: true, message: "No se pudo actualizar el servicio" };
+        return { 
+          status: 400,
+          error: true, 
+          message: "No se pudo actualizar el servicio" };
       }
       return {
+        status: 201,
+        error: false,
+        data: updatedService,
+        message: "El servicio fue actualizado exitosamente!",
+      };
+    } catch (err) {
+      throw err;
+    }
+  }
+  static async updatePrice(serviceId, doctorId, priceDTO) {
+    try {
+      const { priceInitialDate, priceDuration, priceValue } = priceDTO;
+
+      // verificar servicio
+      const service = await Services.findOne({ _id: serviceId });
+      if (!service) {
+        return {
+          status: 404,
+          error: true,
+          message: "Servicio no encontrado",
+        };
+      }
+
+      if (service.doctor._id.toString() !== doctorId) {
+        return {
+          status: 404,
+          error: true,
+          message: "El servicio no pertenece al doctor",
+        };
+      }
+      // ajustes para convertir el precio en objeto
+      const serviceName = service.serviceName;
+      const cleanedServiceName = serviceName.replace(/\s+/g, "_");
+      const randomSuffix = Math.floor(Math.random() * 1000);
+      const currentDate = new Date();
+      const initialDateFormatted = new Date(priceInitialDate);
+      const price = {
+        name: `${cleanedServiceName}_${randomSuffix}_${currentDate
+          .toISOString()
+          .replace(/[-:.]/g, "")}`,
+        price: priceValue,
+        createdAt: Date.now(),
+        expireAt:
+          initialDateFormatted.getTime() + priceDuration * 24 * 60 * 60 * 1000,
+      };
+
+      // actualizacion si el paciente existe
+      service.price.push(price);
+      const updatedService = await service.save();
+
+      return {
+        status: 201,
         error: false,
         data: updatedService,
         message: "El servicio fue actualizado exitosamente!",
