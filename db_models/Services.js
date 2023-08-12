@@ -2,15 +2,16 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const schema = Schema({
-  name: { type: String, required: true },
+  serviceName: { type: String, required: true, unique: true },
   description: { type: String },
   duration: { type: Number, required: true, min: 0 },
   currency: {
     type: String,
     required: true,
     enum: ["ARS", "USD"],
+    default: "ARS",
   },
-  price: { type: Number, required: true, min: 0 },
+  price: { type: Object, required: true },
   USDPrice: { type: Number },
   createdAt: { type: Date, default: Date.now() },
   // relacion con otras colecciones
