@@ -68,6 +68,8 @@ module.exports = class AppointmentsService {
         serviceId,
         addressId,
         paymentMethod,
+        category,
+        type,
       } = appointmentDTO;
       // validar id
       if (
@@ -144,6 +146,8 @@ module.exports = class AppointmentsService {
         service: serviceId,
         address: addressId,
         paymentMethod: paymentMethod,
+        category: category,
+        type: type,
       });
       await newAppointment.save();
       return {

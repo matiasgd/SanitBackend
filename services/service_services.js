@@ -127,7 +127,7 @@ module.exports = class ServicesService {
         duration,
         price: [price],
         currency,
-        doctor,
+        doctor: doctorId,
       });
       // Guardar el servicio en la base de datos
       const createdService = await newService.save();
@@ -174,10 +174,11 @@ module.exports = class ServicesService {
       ).populate("doctor");
 
       if (!updatedService) {
-        return { 
+        return {
           status: 400,
-          error: true, 
-          message: "No se pudo actualizar el servicio" };
+          error: true,
+          message: "No se pudo actualizar el servicio",
+        };
       }
       return {
         status: 201,
