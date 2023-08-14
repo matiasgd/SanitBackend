@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const {
+  getAllAddresses,
   getMyAddresses,
   createAddress,
   deleteAddress,
@@ -12,6 +13,9 @@ const {
 } = require("../controllers/exchangeRate_controller");
 
 //-----------RUTAS GENERALES-------------//
+
+// OBTENER TODOS LOS CONSULTORIOS
+router.get("/", getAllAddresses);
 
 // OBTENER TODOS LOS USUARIOS CHECK PARA CREAR CUENTA
 router.get("/doctor/:doctorId", getMyAddresses);
