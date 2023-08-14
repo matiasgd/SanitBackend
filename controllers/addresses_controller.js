@@ -3,20 +3,36 @@ const AddressService = require("../services/address_services");
 
 module.exports = {
   // RUTAS GENERALES DE PEDIDO GET
+  getAllAddresses: async (req, res, next) => {
+    try {
+      const doctorId = req.params.doctorId;
+      const result = await AddressService.findAllAddresses();
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
+    } catch (err) {
+      next(err);
+    }
+  },
   getMyAddresses: async (req, res, next) => {
     try {
       const doctorId = req.params.doctorId;
-      const addresses = await AddressService.findMyAddresses(doctorId);
-      if (addresses.error) {
-        return res.status(404).send({
-          addresses: addresses,
-          message: "No se encontraron direcciones para este usuario",
-        });
-      }
-      return res.status(201).send({
-        addresses: addresses.data,
-        message: "Las direcciones se han encontrado!",
-      });
+      const result = await AddressService.findMyAddresses(doctorId);
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
     } catch (err) {
       next(err);
     }
@@ -26,19 +42,17 @@ module.exports = {
       const doctorId = req.params.doctorId;
       const addressDTO = { ...req.body };
       // Crear una nueva direccion
-      const createdAddress = await AddressService.createAddress(
-        doctorId,
-        addressDTO
-      );
-      if (createdAddress.error) {
-        return res.status(400).send({
-          message: createdAddress.message,
-        });
-      }
-      res.status(201).send({
-        address: createdAddress,
-        message: createdAddress.message,
-      });
+      const result = await AddressService.createAddress(doctorId, addressDTO);
+      console.log(result, "result")
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
     } catch (err) {
       next(err);
     }

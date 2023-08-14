@@ -6,9 +6,9 @@ const schema = Schema({
   timeOfAppointment: { type: String, required: true },
   status: {
     type: String,
-    enum: ["Pendiente", "Completada", "Cancelada"],
+    enum: ["Pending", "Completed", "Canceled"],
     required: true,
-    default: "Pendiente",
+    default: "Pending",
   },
   cancelReason: { type: String, default: null },
   createdAt: { type: Date, default: Date.now() },
@@ -17,19 +17,6 @@ const schema = Schema({
   doctor: { type: Schema.Types.ObjectId, ref: "users", required: true },
   address: { type: Schema.Types.ObjectId, ref: "addresses", required: true },
   service: { type: Schema.Types.ObjectId, ref: "services", required: true },
-  // datos de pago
-  paymentMethod: {
-    type: String,
-    enum: ["Efectivo", "Tarjeta de credito", "Tarjeta de debito"],
-    required: true,
-  },
-  paymentStatus: {
-    type: String,
-    enum: ["Pendiente", "Completado"],
-    required: true,
-    default: "Pendiente",
-  },
-  paymentDate: { type: Date, default: null },
   category: {
     type: String,
     required: true,
@@ -38,8 +25,29 @@ const schema = Schema({
   type: {
     type: String,
     required: true,
-    enum: ["In person", "Online", "Both"],
+    enum: ["In person", "Online"],
   },
+  // datos de precio
+  servicePrice: { type: Number, required: true },
+  finalPrice: { type: Number, required: true },
+  currency: {
+    type: String,
+    required: true,
+    enum: ["ARS", "USD"],
+  },
+  // datos de pago
+  paymentMethod: {
+    type: String,
+    enum: ["Cash", "DebitCard", "CreditCard", "MercadoPago"],
+    required: true,
+  },
+  paymentStatus: {
+    type: String,
+    enum: ["Pending", "Completed", "Rejected"],
+    required: true,
+    default: "Pending",
+  },
+  paymentDate: { type: Date, default: null },
 });
 
 // Agrega el hook para actualizar la fecha del cambio en operaciones de actualización

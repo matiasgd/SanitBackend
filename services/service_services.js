@@ -127,7 +127,7 @@ module.exports = class ServicesService {
         duration,
         price: [price],
         currency,
-        doctor,
+        doctor: doctorId,
       });
       // Guardar el servicio en la base de datos
       const createdService = await newService.save();
