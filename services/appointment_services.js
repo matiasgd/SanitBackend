@@ -6,7 +6,6 @@ const validTypes = ["Presencial", "Virtual", "Ambos"];
 const validCategories = ["Particular", "Prepaga", "Obra social", "Otro"];
 
 module.exports = class AppointmentsService {
-
   static async findAppointmentById(appointmentId) {
     try {
       // Validar ID
@@ -23,15 +22,16 @@ module.exports = class AppointmentsService {
           message: "La cita no existe en la base de datos",
         };
       }
-      return { 
-        error: false, 
+      return {
+        error: false,
         status: 201,
-        data: appointment };
+        data: appointment,
+      };
     } catch (error) {
       return { error: true, data: error };
     }
   }
-  
+
   static async getAppointmentByDoctorId(doctorId) {
     try {
       // Validar ID
@@ -57,12 +57,50 @@ module.exports = class AppointmentsService {
       return { error: true, data: error };
     }
   }
+
+  static async getAvailableAppointments(doctorId, date) {
+    try {
+      // Validar ID
+      const validId = checkIdFormat(doctorId);
+      if (validId.error) {
+        return validId;
+      }
+      // buscar al usuario
+      const user = await Users.findById(doctorId);
+      if (!user) {
+        return {
+          status: 404,
+          error: true,
+          message: "El doctor no existe",
+        };
+      }
+      // buscar los turnos del doctor
+      const appointments = await Appointments.find({ doctorId })
+        .populate("patient", "name email")
+        .populate("doctor", "name email");
+      if (!appointments) {
+        return {
+          status: 404,
+          error: true,
+          message: "No hay turnos asignados",
+        };
+      }
+      return {
+        error: false,
+        data: appointments,
+        message: "Los turnos fueron encontrados exitosamente",
+      };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
+
   static async createAppointment(appointmentDTO) {
     try {
       // Validar que se proporcionen todos los campos requeridos
       const {
-        date,
-        timeOfAppointment,
+        startTime,
+        endTime,
         patientId,
         doctorId,
         serviceId,
@@ -70,27 +108,16 @@ module.exports = class AppointmentsService {
         paymentMethod,
         category,
         type,
+        servicePrice,
+        finalPrice,
+        currency,
       } = appointmentDTO;
-      // validar id
-      if (
-        !mongoose.isValidObjectId(doctorId) ||
-        !mongoose.isValidObjectId(patientId) ||
-        !mongoose.isValidObjectId(serviceId)
-      ) {
-        return { error: true, message: "El ID es inválido" };
-      }
-      // Validar que se proporcionen todos los campos requeridos
-      if (!date || !timeOfAppointment || !patientId || !doctorId) {
-        return {
-          error: true,
-          message:
-            "La informacion de los campos para la creacion de una cita son incorrectos.",
-        };
-      }
+
       // validar si el paciente existe
       const patient = await Patients.findById(patientId);
       if (!patient) {
         return {
+          status: 404,
           error: true,
           message: "El paciente no existe",
         };
@@ -99,48 +126,39 @@ module.exports = class AppointmentsService {
       const doctor = await Users.findById(doctorId);
       if (!doctor) {
         return {
+          status: 404,
           error: true,
           message: "El doctor no existe",
         };
       }
-
       // validar si el doctor está asignado al paciente
       const isDoctorAssigned = doctor.patients.some((patId) =>
         patId.equals(patientId)
       );
       if (!isDoctorAssigned) {
         return {
+          status: 404,
           error: true,
           message: "El doctor no está asignado al paciente",
         };
       }
       // validar si el turno ya está reservado
       const existingAppointment = await Appointments.findOne({
-        date,
-        timeOfAppointment,
-        doctor: doctorId,
+        startTime,
+        endTime,
+        address: addressId,
       });
       if (existingAppointment)
         return {
+          status: 400,
           error: true,
           message: "El turno del doctor ya existe en el horario solicitado",
         };
 
-      // validar si la fecha es anterior a la actual o si la fecha es igual a la actual y la hora es anterior a la actual.
-      if (
-        moment(date).isBefore(moment()) ||
-        (moment(date).isSame(moment()) &&
-          moment(timeOfAppointment, "HH:mm").isBefore(moment()))
-      )
-        return {
-          error: true,
-          message:
-            "La fecha y hora de la cita no pueden ser anteriores a la actual",
-        };
       // crear el turno en la base de datos
       const newAppointment = new Appointments({
-        date,
-        timeOfAppointment,
+        startTime,
+        endTime,
         patient: patientId,
         doctor: doctorId,
         service: serviceId,
@@ -148,15 +166,23 @@ module.exports = class AppointmentsService {
         paymentMethod: paymentMethod,
         category: category,
         type: type,
+        servicePrice: servicePrice,
+        finalPrice: finalPrice,
+        currency: currency, 
       });
       await newAppointment.save();
       return {
+        status: 201,
         error: false,
         data: newAppointment,
         message: "El turno fue creado exitosamente",
       };
-    } catch (err) {
-      throw err;
+    } catch (error) {
+      return {
+        status: 500,
+        error: true,
+        data: error,
+      };
     }
   }
   static async updateAppointment(appointmentId, appointmentDTO) {

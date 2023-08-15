@@ -18,6 +18,9 @@ router.get("/:id", getAppointmentById);
 // BUSCAR APPOINTMENTS POR ID DE DOCTOR
 router.get("/doctor/:id", getAppointmentByDoctorId);
 
+// BUSCAR APPOINTMENTS DISPONIBLES POR ID DE DOCTOR
+router.get("/doctor/available/:id", getAppointmentByDoctorId);
+
 // CREAR UN APPOINTMENT
 router.post("/new", createAppointment);
 

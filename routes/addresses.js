@@ -4,13 +4,10 @@ const router = express.Router();
 const {
   getAllAddresses,
   getMyAddresses,
+  schedule,
   createAddress,
   deleteAddress,
 } = require("../controllers/addresses_controller");
-
-const {
-  createExchangeRateUSDARS,
-} = require("../controllers/exchangeRate_controller");
 
 //-----------RUTAS GENERALES-------------//
 
@@ -20,10 +17,11 @@ router.get("/", getAllAddresses);
 // OBTENER TODOS LOS USUARIOS CHECK PARA CREAR CUENTA
 router.get("/doctor/:doctorId", getMyAddresses);
 
-// CREAR UN NUEVO SERVICO
-router.post("/new/doctor/:doctorId", createAddress);
+// OBTENER LOS HORARIOS DISPONIBLES DE UN DOCTOR
+router.get("/:addressId/:type", schedule);
 
-router.post("/createfx", createExchangeRateUSDARS);
+// CREAR UN NUEVO CONSULTORIO
+router.post("/new/doctor/:doctorId", createAddress);
 
 // BORRAR DIRECCION
 router.delete("/:addressId", deleteAddress);

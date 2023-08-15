@@ -37,13 +37,31 @@ module.exports = {
       next(err);
     }
   },
+  schedule: async (req, res, next) => {
+    try {
+      const id = req.params.addressId;
+      const type = req.params.type;
+      const result = await AddressService.findSchedule(id, type);
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
+    } catch (err) {
+      next(err);
+    }
+  },
   createAddress: async (req, res, next) => {
     try {
       const doctorId = req.params.doctorId;
       const addressDTO = { ...req.body };
       // Crear una nueva direccion
       const result = await AddressService.createAddress(doctorId, addressDTO);
-      console.log(result, "result")
+      console.log(result, "result");
       result.error
         ? res.status(result.status).send({
             data: result.data,

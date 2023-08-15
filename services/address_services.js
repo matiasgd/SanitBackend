@@ -1,5 +1,5 @@
-const { Users, Addresses } = require("../db_models");
-const mongoose = require("mongoose");
+const { Users, Addresses, Appointments } = require("../db_models");
+const moment = require("moment");
 
 module.exports = class AddressesService {
   static async findAllAddresses() {
@@ -36,7 +36,7 @@ module.exports = class AddressesService {
           message: "El usuario no existe",
         };
       }
-      //console.log(user, id)
+
       // Verificar si el usuario es un doctor
       const addresses = await Addresses.find({ doctor: id });
       console.log(addresses, addresses.length);
@@ -59,8 +59,113 @@ module.exports = class AddressesService {
       };
     }
   }
+
+  static async findSchedule(id, type) {
+    try {
+      const address = await Addresses.findById(id);
+      // Verificar si el usuario existe
+      if (!address) {
+        return {
+          status: 404,
+          error: true,
+          message: "El consultorio no existe",
+        };
+      }
+
+      // Definir la fecha de inicio y fin de la semana actual
+      const today = moment();
+      const startOfWeek = today.clone().startOf("week");
+      const endOfWeek = today.clone().endOf("week");
+
+      // Array para almacenar los horarios
+      const schedule = [];
+
+      // Obtener los horarios del consultorio
+      const appointments = await Appointments.find({
+        address: id,
+        startTime: { $gte: startOfWeek.toDate(), $lt: endOfWeek.toDate() },
+      });
+
+      // Generar los bloques de horarios para toda la semana
+      const startOfDay = moment().hours(9).minutes(0); // Hora de apertura
+      const endOfDay = moment().hours(18).minutes(0); // Hora de cierre
+      const timeIncrement = 30; // Incremento de tiempo en minutos
+
+      // Iterar sobre los bloques de tiempo
+      while (startOfDay.isBefore(endOfDay)) {
+        const appointmentEndTime = startOfDay
+          .clone()
+          .add(timeIncrement, "minutes");
+
+        const isAvailable = appointments.every((appointment) => {
+          const appointmentStart = moment(appointment.startTime);
+          const appointmentEnd = moment(appointment.endTime);
+          return (
+            startOfDay.isBefore(appointmentStart) ||
+            appointmentEndTime.isAfter(appointmentEnd)
+          );
+        });
+
+        if (type === "available" || type === "allschedule") {
+          const blockIsOccupied = appointments.some((appointment) => {
+            const appointmentStart = moment(appointment.startTime);
+            const appointmentEnd = moment(appointment.endTime);
+
+            // Verificar si el bloque de tiempo se superpone con el turno existente
+            const overlaps =
+              (startOfDay.isSameOrBefore(appointmentEnd) &&
+                startOfDay.isSameOrAfter(appointmentStart)) ||
+              (appointmentEndTime.isSameOrBefore(appointmentEnd) &&
+                appointmentEndTime.isSameOrAfter(appointmentStart));
+
+            return overlaps;
+          });
+
+          schedule.push({
+            startTime: startOfDay.toISOString(),
+            endTime: appointmentEndTime.toISOString(),
+            availability: blockIsOccupied ? "occupied" : "available", // Aquí está el cambio
+          });
+        }
+
+        startOfDay.add(timeIncrement, "minutes");
+      }
+
+      // Retornar el resultado
+      if (type === "available") {
+        return {
+          status: 200,
+          error: false,
+          data: schedule,
+        };
+      } else if (type === "allschedule") {
+        return {
+          status: 200,
+          error: false,
+          data: schedule.map((item) => ({
+            ...item,
+            availability:
+              item.availability === "available" ? "available" : "occupied",
+          })),
+        };
+      } else {
+        return {
+          status: 400,
+          error: true,
+          message: "Tipo de horario no válido",
+        };
+      }
+    } catch (error) {
+      return {
+        status: 500,
+        error: true,
+        data: error,
+      };
+    }
+  }
+
   static async createAddress(doctorId, addressDTO) {
-    try { 
+    try {
       const {
         street,
         number,
@@ -105,10 +210,11 @@ module.exports = class AddressesService {
         { new: true }
       );
       if (!updatedDoctor) {
-        return { 
+        return {
           status: 404,
-          error: true, 
-          message: "Médico no encontrado" };
+          error: true,
+          message: "Médico no encontrado",
+        };
       }
       return {
         status: 201,

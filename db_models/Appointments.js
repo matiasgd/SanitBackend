@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const schema = Schema({
-  date: { type: String, required: true },
-  timeOfAppointment: { type: String, required: true },
+  startTime: { type: Date, required: true }, // Fecha y hora de inicio de la cita
+  endTime: { type: Date, required: true }, // Fecha y hora de fin de la cita
   status: {
     type: String,
     enum: ["Pending", "Completed", "Canceled"],
