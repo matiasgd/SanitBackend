@@ -42,20 +42,43 @@ module.exports = {
       next(err);
     }
   },
+
+  getAvailableAppointmentsByDoctorId: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { date } = req.body;
+      const appointments = await AppointmentsService.getAvailableAppointments(
+        id,
+        date
+      );
+
+      if (appointments.error) {
+        return res.status(400).send(appointments.message);
+      }
+      res.status(201).send({
+        appointments: appointments.data,
+        message: appointments.message,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
   createAppointment: async (req, res, next) => {
     try {
       const appointmentDTO = { ...req.body };
-
-      const newAppointment = await AppointmentsService.createAppointment(
+      const result = await AppointmentsService.createAppointment(
         appointmentDTO
       );
-      if (newAppointment.error) {
-        return res.status(400).send(newAppointment.message);
-      }
-      res.status(201).send({
-        appointment: newAppointment.data,
-        message: newAppointment.message,
-      });
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
     } catch (err) {
       next(err);
     }

@@ -6,13 +6,21 @@ const schema = Schema({
   addressName: { type: String, required: true },
   street: { type: String, required: true },
   number: { type: Number, required: true },
-  floor: { type: Number},
+  floor: { type: Number },
   addressType: { type: String },
   webAddress: { type: String },
   houseApartment: { type: String },
   country: { type: String },
   province: { type: String },
   city: { type: String },
+  closingTime: {
+    type: String,
+    required: true,
+  },
+  startingTime: {
+    type: String,
+    required: true,
+  },
 });
 
 schema.plugin(require("mongoose-autopopulate"));
