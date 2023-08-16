@@ -20,7 +20,7 @@ router.get("/", getAll);
 router.get("/:userId", findOneUser);
 
 // OBTENER TODOS LOS PACIENTES DE UN DOCTOR
-router.get("/patients/:doctorId", findDoctorPatients);
+router.get("/:doctorId/patients", findDoctorPatients);
 
 // CREAR UN USUARIO
 router.post("/new", register);
