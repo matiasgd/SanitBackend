@@ -2,8 +2,6 @@ const { Appointments, Patients, Users } = require("../db_models");
 const mongoose = require("mongoose");
 const moment = require("moment");
 const { checkIdFormat } = require("../utils/validations");
-const validTypes = ["Presencial", "Virtual", "Ambos"];
-const validCategories = ["Particular", "Prepaga", "Obra social", "Otro"];
 
 module.exports = class AppointmentsService {
   static async findAppointmentById(appointmentId) {
@@ -94,26 +92,41 @@ module.exports = class AppointmentsService {
       return { error: true, data: error };
     }
   }
-
   static async createAppointment(appointmentDTO) {
     try {
-      // Validar que se proporcionen todos los campos requeridos
       const {
-        startTime,
-        endTime,
+        dateOfAppointment,
+        timeOfAppointment,
+        duration,
         patientId,
         doctorId,
         serviceId,
-        addressId,
+        address,
         paymentMethod,
         category,
         type,
         servicePrice,
-        finalPrice,
+        appointmentPrice,
         currency,
       } = appointmentDTO;
 
-      // validar si el paciente existe
+      // Convertir fecha y hora en un solo objeto Moment
+      let startDateTime = moment(
+        `${dateOfAppointment} ${timeOfAppointment}`,
+        "YYYY-MM-DD HH:mm"
+      );
+
+      // Calculo de EndTime
+      const [durationHours, durationMinutes] = duration.split(":");
+      let endDateTime = startDateTime
+        .clone()
+        .add(Number(durationHours), "hours")
+        .add(Number(durationMinutes), "minutes");
+
+      // Formatear fechas en formato ISO 8601 con UTC
+      const formattedStartTime = startDateTime.toISOString();
+      const formattedEndTime = endDateTime.toISOString();
+    
       const patient = await Patients.findById(patientId);
       if (!patient) {
         return {
@@ -122,6 +135,7 @@ module.exports = class AppointmentsService {
           message: "El paciente no existe",
         };
       }
+
       // validar si el doctor existe
       const doctor = await Users.findById(doctorId);
       if (!doctor) {
@@ -131,46 +145,23 @@ module.exports = class AppointmentsService {
           message: "El doctor no existe",
         };
       }
-      // validar si el doctor está asignado al paciente
-      const isDoctorAssigned = doctor.patients.some((patId) =>
-        patId.equals(patientId)
-      );
-      if (!isDoctorAssigned) {
-        return {
-          status: 404,
-          error: true,
-          message: "El doctor no está asignado al paciente",
-        };
-      }
-      // validar si el turno ya está reservado
-      const existingAppointment = await Appointments.findOne({
-        startTime,
-        endTime,
-        address: addressId,
-      });
-      if (existingAppointment)
-        return {
-          status: 400,
-          error: true,
-          message: "El turno del doctor ya existe en el horario solicitado",
-        };
-
       // crear el turno en la base de datos
       const newAppointment = new Appointments({
-        startTime,
-        endTime,
+        startTime: formattedStartTime,
+        endTime: formattedEndTime,
         patient: patientId,
         doctor: doctorId,
         service: serviceId,
-        address: addressId,
-        paymentMethod: paymentMethod,
+        address: address,
         category: category,
         type: type,
-        servicePrice: servicePrice,
-        finalPrice: finalPrice,
-        currency: currency, 
+        servicePrice: parseInt(servicePrice, 10),
+        appointmentPrice: parseInt(appointmentPrice),
+        currency: currency,
+        paymentMethod: paymentMethod,
       });
       await newAppointment.save();
+
       return {
         status: 201,
         error: false,
