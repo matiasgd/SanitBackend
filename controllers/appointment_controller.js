@@ -27,17 +27,16 @@ module.exports = {
   getAppointmentByDoctorId: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const appointments = await AppointmentsService.getAppointmentByDoctorId(
-        id
-      );
-
-      if (appointments.error) {
-        return res.status(400).send(appointments.message);
-      }
-      res.status(201).send({
-        appointments: appointments.data,
-        message: appointments.message,
-      });
+      const result = await AppointmentsService.getAppointmentByDoctorId(id);
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
     } catch (err) {
       next(err);
     }

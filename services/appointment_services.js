@@ -30,23 +30,28 @@ module.exports = class AppointmentsService {
     }
   }
 
-  static async getAppointmentByDoctorId(doctorId) {
+  static async getAppointmentByDoctorId(doctor) {
     try {
       // Validar ID
-      const validId = checkIdFormat(doctorId);
+      const validId = checkIdFormat(doctor);
       if (validId.error) {
         return validId;
       }
-      const appointments = await Appointments.find({ doctorId })
-        .populate("patient", "name email")
-        .populate("doctor", "name email");
+
+      const appointments = await Appointments.find({ doctor })
+        .populate("address", "addressName street number")
+        .populate("patient", "name lastName")
+        .populate("service", "serviceName");
+
       if (!appointments) {
         return {
+          status: 404,
           error: true,
           message: "No hay turnos asignados",
         };
       }
       return {
+        status: 201,
         error: false,
         data: appointments,
         message: "Los turnos fueron encontrados exitosamente",
@@ -126,7 +131,7 @@ module.exports = class AppointmentsService {
       // Formatear fechas en formato ISO 8601 con UTC
       const formattedStartTime = startDateTime.toISOString();
       const formattedEndTime = endDateTime.toISOString();
-    
+
       const patient = await Patients.findById(patientId);
       if (!patient) {
         return {
