@@ -11,7 +11,6 @@ const schema = Schema({
     default: "Pending",
   },
   cancelReason: { type: String, default: null },
-  createdAt: { type: Date, default: Date.now() },
   // relacion con otras colecciones
   patient: { type: Schema.Types.ObjectId, ref: "patients", required: true },
   doctor: { type: Schema.Types.ObjectId, ref: "users", required: true },
@@ -20,16 +19,21 @@ const schema = Schema({
   category: {
     type: String,
     required: true,
-    enum: ["Particular", "Prepaga", "Obra social", "Otro"],
+    enum: [
+      "Union insurance",
+      "Private insurance",
+      "Without insurance",
+      "Other",
+    ],
   },
   type: {
     type: String,
     required: true,
-    enum: ["In person", "Online"],
+    enum: ["In office", "Online"],
   },
   // datos de precio
   servicePrice: { type: Number, required: true },
-  finalPrice: { type: Number, required: true },
+  appointmentPrice: { type: Number, required: true },
   currency: {
     type: String,
     required: true,
@@ -48,6 +52,7 @@ const schema = Schema({
     default: "Pending",
   },
   paymentDate: { type: Date, default: null },
+  createdAt: { type: Date, default: Date.now() },
 });
 
 // Agrega el hook para actualizar la fecha del cambio en operaciones de actualización
