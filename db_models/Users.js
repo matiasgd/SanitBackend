@@ -8,6 +8,7 @@ const schema = Schema({
   // datos obligatorios de registro
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  // recupero de password
   passwordResetToken: { type: String, default: null },
   role: { type: String, default: "user" },
   attempts_count: { type: Number, default: 0 },

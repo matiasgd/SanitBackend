@@ -122,6 +122,7 @@ module.exports = class UsersService {
   }
   static async completeRegister(doctorId, doctorDTO) {
     try {
+      console.log(doctorDTO, "doctorDTO");
       // Validar ID
       const validId = checkIdFormat(doctorId);
       if (validId.error) {
@@ -131,30 +132,27 @@ module.exports = class UsersService {
       let doctor = await Users.findById(doctorId);
       if (!doctor) {
         return {
+          status: 400,
           error: true,
           message: "El usuario no existe",
         };
       }
+      // Verificar que el usuario no haya completado su registro
       if (doctor.profileCompleted === true) {
         return {
+          status: 400,
           error: true,
           message: "El usuario ya completó su registro",
         };
       }
-      // Validar que se proporcionen todos los campos requeridos
-      const { name, lastName, gender, cellphone, birthdate, field, specialty } =
-        doctorDTO;
       // Actualizar el usuario
-      doctor.name = name;
-      doctor.lastName = lastName;
-      doctor.gender = gender;
-      doctor.cellphone = cellphone;
-      doctor.birthdate = birthdate;
-      doctor.field = field;
-      doctor.specialty = specialty;
-      doctor.profileCompleted = true;
-      const updatedUser = await doctor.save();
+      const updatedUser = await Users.findOneAndUpdate(
+        { _id: doctorId },
+        { doctorDTO },
+        { new: true }
+      );
       return {
+        status: 201,
         error: false,
         data: updatedUser,
         message: "El usuario se ha actualizado correctamente",
@@ -179,6 +177,7 @@ module.exports = class UsersService {
         "birthdate",
         "field",
         "specialty",
+        "profileCompleted",
       ];
       const user = await Users.findById(id);
       if (!user) {

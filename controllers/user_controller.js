@@ -79,17 +79,16 @@ module.exports = {
     try {
       const userDTO = { ...req.body };
       const id = req.params.doctorId;
-      const completeProfile = await UserService.completeRegister(id, userDTO);
-      if (completeProfile.error) {
-        return res.status(400).send({
-          user: completeProfile.data,
-          message: completeProfile.message,
-        });
-      }
-      res.status(201).send({
-        user: completeProfile.data,
-        message: "El usuario se ha actualizado correctamente",
-      });
+      const result = await UserService.completeRegister(id, userDTO);
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
     } catch (err) {
       next(err);
     }
