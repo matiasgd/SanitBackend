@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   getPatients,
+  getOnePatient,
   createPatient,
   seedPatients,
   updatePatient,
@@ -22,6 +23,9 @@ const upload = multer(multerConfig);
 
 // OBTENER PACIENTES TOTALES DEL SISTEMA
 router.get("/", getPatients);
+
+// OBTENER UN PACIENTE DE LA BASE DE DATOS
+router.get("/:patientId", getOnePatient);
 
 // CREAR PACIENTES
 router.post("/new/:doctorId", createPatient);

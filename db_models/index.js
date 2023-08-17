@@ -15,5 +15,5 @@ module.exports = {
   Patients,
   MonthlyMetric,
   DailyMetric,
-  ExchangeRate
+  ExchangeRate  
 };

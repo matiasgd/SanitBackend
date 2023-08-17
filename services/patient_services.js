@@ -20,15 +20,26 @@ module.exports = class PatientService {
       return { error: true, data: error };
     }
   }
-  static async findById(id) {
+  static async findOnePatient(id) {
     try {
       // Validar ID
       const validId = checkIdFormat(id);
       if (validId.error) {
         return validId;
       }
-      const user = await Patients.findById(id);
-      return { error: false, data: user };
+      const patient = await Patients.findById(id);
+      if (!patient) {
+        return {
+          error: true,
+          status: 404,
+          message: "El paciente no existe en la base de datos.",
+        };
+      }
+      return {
+        status: 201,
+        error: false,
+        data: patient,
+      };
     } catch (error) {
       return { error: true, data: error };
     }
