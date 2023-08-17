@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getAppointmentById,
   getAppointmentByDoctorId,
+  seedAppointments,
   createAppointment,
   updateAppointment,
   confirmAppointment,
@@ -20,6 +21,9 @@ router.get("/doctor/:id", getAppointmentByDoctorId);
 
 // BUSCAR APPOINTMENTS DISPONIBLES POR ID DE DOCTOR
 router.get("/doctor/available/:id", getAppointmentByDoctorId);
+
+// SEED DE APPOINTMENTS
+router.post("/seed/:doctorId", seedAppointments); 
 
 // CREAR UN APPOINTMENT
 router.post("/new", createAppointment);

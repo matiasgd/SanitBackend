@@ -20,6 +20,23 @@ module.exports = {
       next(err);
     }
   },
+  getOnePatient: async (req, res, next) => {
+    try {
+      const patientId = req.params.patientId;
+      const result = await PatientsService.findOnePatient(patientId);
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
+    } catch (err) {
+      next(err);
+    }
+  },
   createPatient: async (req, res, next) => {
     try {
       const doctorId = req.params.doctorId;
@@ -41,12 +58,10 @@ module.exports = {
       next(err);
     }
   },
-
   seedPatients: async (req, res, next) => {
     try {
       const doctorId = req.params.doctorId;
       const numPatients = req.body.numPatients;
-      console.log(numPatients, "numPatients");
       const user = await Users.findById(doctorId);
       const patients = [];
 
@@ -116,7 +131,6 @@ module.exports = {
       });
     }
   },
-
   bulkCreatePatients: async (req, res, next) => {
     try {
       const doctorId = req.params.doctorId.toString();
