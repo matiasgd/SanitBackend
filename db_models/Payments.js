@@ -7,12 +7,15 @@ const schema = Schema({
     ref: "appointments",
     required: true,
   },
+  doctor: { type: Schema.Types.ObjectId, ref: "users", required: true },
   amount: { type: Number, required: true },
   currency: {
     type: String,
     required: true,
     enum: ["ARS", "USD"],
   },
+  amountUSD: { type: Number },
+  exchangeRate: { type: Number },
   method: {
     type: String,
     enum: ["Cash", "DebitCard", "CreditCard", "MercadoPago"],

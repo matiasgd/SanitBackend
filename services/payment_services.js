@@ -1,4 +1,4 @@
-const { Payments, Appointments } = require("../db_models");
+const { Payments, Appointments, ExchangeRate } = require("../db_models");
 const { checkIdFormat } = require("../utils/validations");
 const moment = require("moment");
 
@@ -53,10 +53,20 @@ module.exports = class AppointmentsService {
       if (validId.error) {
         return validId;
       }
-      const payments = await Payments.find({ doctor }).populate(
-        "appointment",
-        "patient service"
-      );
+      const payments = await Payments.find({ doctor }).populate({
+        path: "appointment",
+        select: "service patient",
+        populate: [
+          {
+            path: "patient",
+            select: "name lastName",
+          },
+          {
+            path: "service",
+            select: "serviceName", // Selecciona los campos que deseas traer
+          },
+        ],
+      });
       if (!payments) {
         return {
           status: 404,
@@ -68,7 +78,7 @@ module.exports = class AppointmentsService {
         status: 201,
         error: false,
         data: payments,
-        message: "Los turnos fueron encontrados exitosamente",
+        message: "Los pagos fueron encontrados exitosamente!",
       };
     } catch (error) {
       return { error: true, data: error };
@@ -79,6 +89,7 @@ module.exports = class AppointmentsService {
       console.log(paymentDTO, "paymentDTO");
       const {
         appointmentId, // ID de la cita asociada al pago
+        doctorId, // ID del doctor
         date, // Fecha del pago
         amount,
         currency,
@@ -98,18 +109,71 @@ module.exports = class AppointmentsService {
           message: "La cita no existe",
         };
       }
+
+      // Buscar tipo de cambio
+      let closestExchangeRate = null;
+      if (currency === "ARS") {
+        console.log("entro al if");
+        // tipo de cambio
+        const exchangeRates = await ExchangeRate.find({ type: "Parallel" });
+        // Ordenar los tipos de cambio por fecha en orden descendente
+        exchangeRates.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // Tipo de cambio más cercano a la fecha de pago
+        closestExchangeRate = exchangeRates.reduce((closest, current) => {
+          const closestTimeDifference = Math.abs(
+            formattedDate - new Date(closest.date)
+          );
+          const currentTimeDifference = Math.abs(
+            formattedDate - new Date(current.date)
+          );
+
+          return currentTimeDifference < closestTimeDifference
+            ? current
+            : closest;
+        }, exchangeRates[0]);
+
+        console.log(closestExchangeRate, "closestExchangeRate");
+      }
+
+      if (appointment.paymentStatus === "Completed") {
+        return {
+          status: 404,
+          error: true,
+          message:
+            "La cita ya fue pagada previamente, no puede abonarse dos veces!",
+        };
+      }
       // Crear el nuevo pago
-      console.log(formattedDate, "formattedDate");
       const newPayment = new Payments({
         appointment: appointmentId,
+        doctor: doctorId,
         amount: parseInt(amount),
         currency: currency,
+        exchangeRate: currency === "ARS" ? closestExchangeRate.buyer : amount,
+        amountUSD: (parseInt(amount) / closestExchangeRate.buyer).toFixed(2),
         method: method,
         status: status,
         paymentDate: formattedDate,
       });
       // Guardar el pago en la base de datos
       await newPayment.save();
+
+      // Actualizar el estado de la cita
+      if (status === "Completed") {
+        await appointment.updateOne({
+          paymentStatus: "Completed",
+          paymentDate: formattedDate,
+        });
+      }
+      // caso de citas con pago parcial
+      else {
+        await appointment.updateOne({
+          paymentStatus: "Partial",
+          paymentDate: formattedDate,
+        });
+      }
+
       return {
         status: 201,
         error: false,
