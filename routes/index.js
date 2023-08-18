@@ -7,6 +7,7 @@ const services = require("./services");
 const patients = require("./patients");
 const auth = require("./auth");
 const exchangeRate = require("./exchangeRate");
+const payments = require("./payments");
 
 
 router.use("/users", users);
@@ -16,6 +17,7 @@ router.use("/services", services);
 router.use("/patients", patients);
 router.use("/auth", auth);
 router.use("/fx", exchangeRate);
+router.use("/payments", payments);
 
 
 
