@@ -23,7 +23,7 @@ const schema = Schema({
   },
   status: {
     type: String,
-    enum: ["Completed", "Partial"],
+    enum: ["Full", "Partial"],
     required: true,
     default: "Pending",
   },

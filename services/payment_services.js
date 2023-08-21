@@ -86,11 +86,10 @@ module.exports = class AppointmentsService {
   }
   static async createPayment(paymentDTO) {
     try {
-      console.log(paymentDTO, "paymentDTO");
       const {
-        appointmentId, // ID de la cita asociada al pago
-        doctorId, // ID del doctor
-        date, // Fecha del pago
+        appointmentId,
+        doctorId,
+        date,
         amount,
         currency,
         method,
@@ -109,11 +108,9 @@ module.exports = class AppointmentsService {
           message: "La cita no existe",
         };
       }
-
       // Buscar tipo de cambio
       let closestExchangeRate = null;
       if (currency === "ARS") {
-        console.log("entro al if");
         // tipo de cambio
         const exchangeRates = await ExchangeRate.find({ type: "Parallel" });
         // Ordenar los tipos de cambio por fecha en orden descendente
@@ -132,10 +129,9 @@ module.exports = class AppointmentsService {
             ? current
             : closest;
         }, exchangeRates[0]);
-
-        console.log(closestExchangeRate, "closestExchangeRate");
       }
 
+      console.log(appointment.paymentStatus, "que viene en el appointment");
       if (appointment.paymentStatus === "Completed") {
         return {
           status: 404,
@@ -145,22 +141,37 @@ module.exports = class AppointmentsService {
         };
       }
       // Crear el nuevo pago
+      const UsdPayment = (parseInt(amount) / closestExchangeRate.buyer).toFixed(
+        2
+      );
+
+      console.log(
+        appointmentId,
+        doctorId,
+        amount,
+        currency,
+        method,
+        status,
+        formattedDate
+      );
+
       const newPayment = new Payments({
         appointment: appointmentId,
         doctor: doctorId,
         amount: parseInt(amount),
         currency: currency,
         exchangeRate: currency === "ARS" ? closestExchangeRate.buyer : amount,
-        amountUSD: (parseInt(amount) / closestExchangeRate.buyer).toFixed(2),
+        amountUSD: UsdPayment,
         method: method,
         status: status,
         paymentDate: formattedDate,
       });
+
       // Guardar el pago en la base de datos
       await newPayment.save();
 
       // Actualizar el estado de la cita
-      if (status === "Completed") {
+      if (status === "Full") {
         await appointment.updateOne({
           paymentStatus: "Completed",
           paymentDate: formattedDate,
@@ -173,7 +184,6 @@ module.exports = class AppointmentsService {
           paymentDate: formattedDate,
         });
       }
-
       return {
         status: 201,
         error: false,
