@@ -6,7 +6,7 @@ const schema = Schema({
   endTime: { type: Date, required: true }, // Fecha y hora de fin de la cita
   status: {
     type: String,
-    enum: ["Pending", "Completed", "Canceled"],
+    enum: ["Pending", "Completed", "Canceled", "Skipped"],
     required: true,
     default: "Pending",
   },
