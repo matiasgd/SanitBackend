@@ -40,14 +40,9 @@ const schema = Schema({
     enum: ["ARS", "USD"],
   },
   // datos de pago
-  paymentMethod: {
-    type: String,
-    enum: ["Cash", "DebitCard", "CreditCard", "MercadoPago"],
-    required: true,
-  },
   paymentStatus: {
     type: String,
-    enum: ["Pending", "Completed", "Rejected"],
+    enum: ["Partial", "Completed", "Pending"],
     required: true,
     default: "Pending",
   },
