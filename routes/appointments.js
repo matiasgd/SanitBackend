@@ -3,11 +3,11 @@ const router = express.Router();
 const {
   getAppointmentById,
   getAppointmentByDoctorId,
+  GetPendingPaymentsById,
   seedAppointments,
   createAppointment,
   updateAppointment,
   confirmAppointment,
-  confirmPayment,
   deleteAppointment,
 } = require("../controllers/appointment_controller");
 
@@ -19,11 +19,14 @@ router.get("/:id", getAppointmentById);
 // BUSCAR APPOINTMENTS POR ID DE DOCTOR
 router.get("/doctor/:id", getAppointmentByDoctorId);
 
+// BUSCAR PENDING PAYMENTS
+router.get("/debts/:doctorId", GetPendingPaymentsById);
+
 // BUSCAR APPOINTMENTS DISPONIBLES POR ID DE DOCTOR
 router.get("/doctor/available/:id", getAppointmentByDoctorId);
 
 // SEED DE APPOINTMENTS
-router.post("/seed/:doctorId", seedAppointments); 
+router.post("/seed/:doctorId", seedAppointments);
 
 // CREAR UN APPOINTMENT
 router.post("/new", createAppointment);
@@ -33,9 +36,6 @@ router.put("/update/:appointmentId", updateAppointment);
 
 // CONFIRMAR UN APPOINTMENT
 router.put("/status/:appointmentId", confirmAppointment);
-
-// CONFIRMAR UN APPOINTMENT
-router.put("/payment/:appointmentId", confirmPayment);
 
 // BORRAR UN APPOINTMENT
 router.delete("/delete/:appointmentId", deleteAppointment);

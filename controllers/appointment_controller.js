@@ -68,6 +68,28 @@ module.exports = {
       next(err);
     }
   },
+
+  GetPendingPaymentsById: async (req, res, next) => {
+    try {
+      const doctorId = req.params.doctorId;
+      // Actualiza la cita
+      const result = await AppointmentsService.pendingPaymentsById(
+        doctorId
+      );
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
+    } catch (err) {
+      next(err);
+    }
+  },
+
   seedAppointments: async (req, res, next) => {
     try {
       const doctorId = req.params.doctorId;
@@ -231,59 +253,6 @@ module.exports = {
       next(err);
     }
   },
-  confirmPayment: async (req, res, next) => {
-    try {
-      const appointmentId = req.params.appointmentId;
-      const appointmentDTO = { ...req.body };
-
-      // Actualiza la cita
-      const updatedAppointment = await AppointmentsService.updateAppointment(
-        appointmentId,
-        appointmentDTO
-      );
-      if (updatedAppointment.error) {
-        return res.status(400).send(updatedAppointment.message);
-      }
-      // Actualiza los modelos de métricas mensuales y diarias
-      const currentDate = new Date();
-      const month = currentDate.getMonth() + 1;
-      const year = currentDate.getFullYear();
-
-      // Obtener tipo de cambio
-      const exchangeRate = await exchangeRateService.getCurrentUSDARS();
-      const buyerExchangeRate = exchangeRate.data.buyer;
-
-      // Actualiza el modelo de métricas mensuales
-      const updatedMonthlyMetrics = await MonthlyMetricsService.payments(
-        appointmentId,
-        month,
-        year,
-        buyerExchangeRate
-      );
-
-      // Actualiza el modelo de métricas diarias
-      const updateDailyMetrics = await DailyMetricsService.updateDailyMetrics(
-        appointmentId,
-        buyerExchangeRate
-      );
-
-      if (updatedMonthlyMetrics.error || updateDailyMetrics.error) {
-        return res
-          .status(400)
-          .send(updatedMonthlyMetrics.message || updateDailyMetrics.message);
-      }
-
-      res.status(201).send({
-        appointment: updatedAppointment.data,
-        MonthlyMetrics: updatedMonthlyMetrics.data,
-        DailyMetrics: updateDailyMetrics.data,
-        message: updatedAppointment.message,
-      });
-    } catch (err) {
-      next(err);
-    }
-  },
-
   deleteAppointment: async (req, res, next) => {
     try {
       const appointmentId = req.params.appointmentId;

@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const moment = require("moment");
 const { checkIdFormat } = require("../utils/validations");
 
+
 module.exports = class AppointmentsService {
   static async findAppointmentById(appointmentId) {
     try {
@@ -58,6 +59,39 @@ module.exports = class AppointmentsService {
       };
     } catch (error) {
       return { error: true, data: error };
+    }
+  }
+  static async pendingPaymentsById(doctorId) {
+    try {
+      // validar si el turno existe
+      const users = await Users.findById(doctorId);
+      if (!users) {
+        return {
+          status: 404,
+          error: true,
+          message: "El user no existe",
+        };
+      }
+      const appointments = await Appointments.find({ doctor: doctorId });
+      // buscar los appointments en situacion de deuda
+      const debt = appointments
+        .filter(
+          (appointment) =>
+            (appointment.status === "Completed" &&
+              appointment.paymentStatus === "Pending") ||
+            appointment.paymentStatus === "Partial"
+        )
+        .map((appointment) => appointment.appointmentPrice)
+        .reduce((total, price) => total + price, 0);
+
+      return {
+        status: 201,
+        error: false,
+        data: debt,
+        message: "Estos son los pagos pendientes de recibir del doctor",
+      };
+    } catch (err) {
+      throw err;
     }
   }
 
