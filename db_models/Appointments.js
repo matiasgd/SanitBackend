@@ -49,6 +49,7 @@ const schema = Schema({
   partialPayment: { type: Number, default: null },
   paymentDate: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now() },
+  notes: { type: String, default: null },
 });
 
 // Agrega el hook para actualizar la fecha del cambio en operaciones de actualización
