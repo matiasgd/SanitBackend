@@ -4,6 +4,7 @@ const {
   getAllPayments,
   getPaymentById,
   getPaymentsByDoctorId,
+  getPaymentsByPatientId,
   createPayment,
   updatePayment,
   deletePayment,
@@ -18,8 +19,11 @@ router.get("/", getAllPayments);
 // BUSCAR PAGO POR ID
 router.get("/:paymentId", getPaymentById);
 
-// BUSCAR APPOINTMENTS POR ID DE DOCTOR
+// BUSCAR PAGOS POR ID DE DOCTOR
 router.get("/doctor/:doctorId", getPaymentsByDoctorId);
+
+// BUSCAR PAGOS POR ID DE PACIENTE
+router.get("/patient/:patientId", getPaymentsByPatientId);
 
 // CREAR UN PAGO
 router.post("/new", createPayment);

@@ -8,6 +8,7 @@ const schema = Schema({
     required: true,
   },
   doctor: { type: Schema.Types.ObjectId, ref: "users", required: true },
+  patient: { type: Schema.Types.ObjectId, ref: "patients", required: true },
   amount: { type: Number, required: true },
   currency: {
     type: String,

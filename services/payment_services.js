@@ -84,11 +84,50 @@ module.exports = class AppointmentsService {
       return { error: true, data: error };
     }
   }
+  static async getPaymentsByPatientId(patient) {
+    try {
+      // Validar ID
+      const validId = checkIdFormat(patient);
+      if (validId.error) {
+        return validId;
+      }
+      const payments = await Payments.find({ patient }).populate({
+        path: "appointment",
+        select: "service patient",
+        populate: [
+          {
+            path: "patient",
+            select: "name lastName",
+          },
+          {
+            path: "service",
+            select: "serviceName",
+          },
+        ],
+      });
+      if (!payments) {
+        return {
+          status: 404,
+          error: true,
+          message: "No hay turnos asignados para este paciente",
+        };
+      }
+      return {
+        status: 201,
+        error: false,
+        data: payments,
+        message: "Los pagos fueron encontrados exitosamente!",
+      };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
   static async createPayment(paymentDTO) {
     try {
       const {
         appointmentId,
         doctorId,
+        patientId,
         date,
         amount,
         currency,
@@ -148,6 +187,7 @@ module.exports = class AppointmentsService {
       console.log(
         appointmentId,
         doctorId,
+        patientId,
         amount,
         currency,
         method,
@@ -158,6 +198,7 @@ module.exports = class AppointmentsService {
       const newPayment = new Payments({
         appointment: appointmentId,
         doctor: doctorId,
+        patient: patientId,
         amount: parseInt(amount),
         currency: currency,
         exchangeRate: currency === "ARS" ? closestExchangeRate.buyer : amount,
@@ -182,6 +223,7 @@ module.exports = class AppointmentsService {
         await appointment.updateOne({
           paymentStatus: "Partial",
           paymentDate: formattedDate,
+          partialPayment: parseInt(amount),
         });
       }
       return {
