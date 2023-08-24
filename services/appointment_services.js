@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const moment = require("moment");
 const { checkIdFormat } = require("../utils/validations");
 
-
 module.exports = class AppointmentsService {
   static async findAppointmentById(appointmentId) {
     try {
@@ -61,6 +60,38 @@ module.exports = class AppointmentsService {
       return { error: true, data: error };
     }
   }
+
+  static async getAppointmentsByPatientId(patient) {
+    try {
+      // Validar ID
+      const validId = checkIdFormat(patient);
+      if (validId.error) {
+        return validId;
+      }
+
+      const appointments = await Appointments.find({ patient })
+        .populate("address", "addressName street number")
+        .populate("patient", "name lastName")
+        .populate("service", "serviceName");
+
+      if (!appointments) {
+        return {
+          status: 404,
+          error: true,
+          message: "No hay turnos asignados al paciente",
+        };
+      }
+      return {
+        status: 201,
+        error: false,
+        data: appointments,
+        message: "Los turnos fueron encontrados exitosamente",
+      };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
+
   static async pendingPaymentsById(doctorId) {
     try {
       // validar si el turno existe

@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getAppointmentById,
   getAppointmentByDoctorId,
+  getAppointmentsByPatientId,
   GetPendingPaymentsById,
   seedAppointments,
   createAppointment,
@@ -19,11 +20,11 @@ router.get("/:id", getAppointmentById);
 // BUSCAR APPOINTMENTS POR ID DE DOCTOR
 router.get("/doctor/:id", getAppointmentByDoctorId);
 
+// BUSCAR APPOINTMENTS POR ID DE DOCTOR
+router.get("/patient/:id", getAppointmentsByPatientId);
+
 // BUSCAR PENDING PAYMENTS
 router.get("/debts/:doctorId", GetPendingPaymentsById);
-
-// BUSCAR APPOINTMENTS DISPONIBLES POR ID DE DOCTOR
-router.get("/doctor/available/:id", getAppointmentByDoctorId);
 
 // SEED DE APPOINTMENTS
 router.post("/seed/:doctorId", seedAppointments);

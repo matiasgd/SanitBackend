@@ -55,6 +55,23 @@ module.exports = {
       next(err);
     }
   },
+  getPaymentsByPatientId: async (req, res, next) => {
+    try {
+      const { patientId } = req.params;
+      const result = await PaymentsService.getPaymentsByPatientId(patientId);
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
+    } catch (err) {
+      next(err);
+    }
+  },
   createPayment: async (req, res, next) => {
     try {
       const paymentDTO = { ...req.body };

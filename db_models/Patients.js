@@ -49,6 +49,7 @@ const schema = Schema({
       //autopopulate: true,
     },
   ],
+  createdAt: { type: Date, default: Date.now() },
 });
 
 // Hook para calcular la edad antes de guardar

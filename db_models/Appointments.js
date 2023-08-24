@@ -46,6 +46,7 @@ const schema = Schema({
     required: true,
     default: "Pending",
   },
+  partialPayment: { type: Number, default: null },
   paymentDate: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now() },
 });

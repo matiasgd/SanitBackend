@@ -48,6 +48,25 @@ module.exports = {
     }
   },
 
+  getAppointmentsByPatientId: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const result = await AppointmentsService.getAppointmentsByPatientId(id);
+      result.error
+        ? res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          })
+        : res.status(result.status).send({
+            data: result.data,
+            message: result.message,
+          });
+    } catch (err) {
+      next(err);
+    }
+  },
+  
+
   getAvailableAppointmentsByDoctorId: async (req, res, next) => {
     try {
       const { id } = req.params;
