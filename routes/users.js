@@ -26,7 +26,7 @@ router.get("/:doctorId/patients", findDoctorPatients);
 router.post("/new", register);
 
 // COMPLETANDO EL REGISTRO DE UN USUARIO
-router.post("/complete/:doctorId", completeRegister);
+router.put("/:doctorId/edit", completeRegister);
 
 // MODIFICAR UN USUARIO
 router.put("/update/:userId", updateUser);
