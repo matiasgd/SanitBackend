@@ -25,6 +25,7 @@ module.exports = class UsersService {
         return validId;
       }
       const user = await Users.findById(userId);
+      console.log(user, "user");
       if (!user) {
         return {
           error: true,
@@ -122,7 +123,6 @@ module.exports = class UsersService {
   }
   static async completeRegister(doctorId, doctorDTO) {
     try {
-      console.log(doctorDTO, "doctorDTO");
       // Validar ID
       const validId = checkIdFormat(doctorId);
       if (validId.error) {
@@ -148,7 +148,7 @@ module.exports = class UsersService {
       // Actualizar el usuario
       const updatedUser = await Users.findOneAndUpdate(
         { _id: doctorId },
-        { doctorDTO },
+        doctorDTO,
         { new: true }
       );
       return {
