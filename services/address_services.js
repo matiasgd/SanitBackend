@@ -166,7 +166,9 @@ module.exports = class AddressesService {
 
   static async createAddress(doctorId, addressDTO) {
     try {
+      console.log(addressDTO, "consultorio");
       const {
+        addressName,
         street,
         number,
         floor,
@@ -178,13 +180,15 @@ module.exports = class AddressesService {
         city,
       } = addressDTO;
 
-      // validar que los campos obligatorios no esten vacios
-      if (!street || !number) {
-        return {
-          status: 400,
-          error: true,
-          message: "Faltan campos obligatorios",
-        };
+      if (addressType !== "virtual office") {
+        // validar que los campos obligatorios no esten vacios
+        if (!street || !number) {
+          return {
+            status: 400,
+            error: true,
+            message: "Faltan campos obligatorios",
+          };
+        }
       }
       // Verificar si el médico existe
       const doctor = await Users.findOne({ _id: doctorId });
