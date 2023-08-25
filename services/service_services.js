@@ -73,6 +73,7 @@ module.exports = class ServicesService {
       const {
         serviceName,
         description,
+        address,
         hours,
         minutes,
         currency,
@@ -80,6 +81,8 @@ module.exports = class ServicesService {
         priceDuration,
         priceValue,
       } = serviceDTO;
+
+      console.log(address, "address")
 
       // ajustes para convertir el precio en objeto
       const cleanedServiceName = serviceName.replace(/\s+/g, "_");
@@ -124,6 +127,7 @@ module.exports = class ServicesService {
       const newService = new Services({
         serviceName,
         description,
+        address,
         duration,
         price: [price],
         currency,
@@ -131,6 +135,8 @@ module.exports = class ServicesService {
       });
       // Guardar el servicio en la base de datos
       const createdService = await newService.save();
+
+      console.log(createdService, "createdService");
       return {
         status: 201,
         error: false,
@@ -260,7 +266,7 @@ module.exports = class ServicesService {
       // Borrar el servicio si el doctor existe
       const removedService = await Services.findOneAndUpdate(
         { _id: serviceId },
-        {status: false},
+        { status: false },
         { new: true }
       ).populate("doctor");
 

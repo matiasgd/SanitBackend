@@ -11,7 +11,7 @@ const payments = require("./payments");
 
 
 router.use("/users", users);
-router.use("/address", addresses);
+router.use("/addresses", addresses);
 router.use("/appointments", appointments);
 router.use("/services", services);
 router.use("/patients", patients);
