@@ -3,6 +3,12 @@ const { Schema } = mongoose;
 
 const schema = Schema({
   serviceName: { type: String, required: true },
+  address: {
+    type: Schema.Types.ObjectId,
+    ref: "addresses",
+    required: true,
+    default: null,
+  },
   description: { type: String },
   duration: { type: Number, required: true, min: 0 },
   currency: {
