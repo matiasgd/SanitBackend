@@ -137,14 +137,14 @@ module.exports = class UsersService {
           message: "El usuario no existe",
         };
       }
-      // Verificar que el usuario no haya completado su registro
-      if (doctor.profileCompleted === true) {
-        return {
-          status: 400,
-          error: true,
-          message: "El usuario ya completó su registro",
-        };
-      }
+      // // Verificar que el usuario no haya completado su registro
+      // if (doctor.profileCompleted === true) {
+      //   return {
+      //     status: 400,
+      //     error: true,
+      //     message: "El usuario ya completó su registro",
+      //   };
+      // }
       // Actualizar el usuario
       const updatedUser = await Users.findOneAndUpdate(
         { _id: doctorId },
