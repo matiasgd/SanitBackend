@@ -9,7 +9,7 @@ const {
 } = require("../utils/validations");
 const { corsOrigin, sanitEmail } = require("../config");
 const transporter = require("../config/transporter");
-const { generateFormToken } = require("../utils/token");
+const { generateFormToken, decodeResetToken } = require("../utils/token");
 
 module.exports = class PatientService {
   static async findPatients() {
@@ -248,7 +248,12 @@ module.exports = class PatientService {
       let lastName = doctor.lastName;
 
       const token = generateFormToken(doctorId, patientId);
-      const loginForm = `${corsOrigin}/patient/complete/${token}`;
+
+      const base64EncodedToken = btoa(token);
+      const loginForm = `${corsOrigin}/patient/complete/${base64EncodedToken}`;
+      //const originalToken = atob(base64EncodedToken);   
+      //console.log(decodeResetToken(originalToken), "tokendespues");
+
       const mailOptions = {
         from: sanitEmail,
         to: patientEmail,
