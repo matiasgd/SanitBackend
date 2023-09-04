@@ -9,7 +9,7 @@ const {
 } = require("../utils/validations");
 const { corsOrigin, sanitEmail } = require("../config");
 const transporter = require("../config/transporter");
-const { generateResetToken } = require("../utils/token");
+const { generateFormToken } = require("../utils/token");
 
 module.exports = class PatientService {
   static async findPatients() {
@@ -246,8 +246,8 @@ module.exports = class PatientService {
       let patientId = patient._id.toString();
       let name = doctor.name;
       let lastName = doctor.lastName;
-      const token = generateResetToken(patientId);
-      console.log(token, "token", patientId, "patientId");
+
+      const token = generateFormToken(doctorId, patientId);
       const loginForm = `${corsOrigin}/patient/complete/${token}`;
       const mailOptions = {
         from: sanitEmail,
