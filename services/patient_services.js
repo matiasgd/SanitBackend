@@ -9,7 +9,7 @@ const {
 } = require("../utils/validations");
 const { corsOrigin, sanitEmail } = require("../config");
 const transporter = require("../config/transporter");
-const { generateResetToken } = require("../utils/token");
+const { generateFormToken, decodeResetToken } = require("../utils/token");
 
 module.exports = class PatientService {
   static async findPatients() {
@@ -220,11 +220,11 @@ module.exports = class PatientService {
     try {
       // validar si ya existe el perfil del paciente
       const patient = await Patients.findOne({ email: patientEmail });
-      if (patient) {
+      if (!patient) {
         return {
           error: true,
           status: 400,
-          message: "El paciente ya tiene un perfil creado.",
+          message: "El paciente no existe.",
         };
       }
 
@@ -243,16 +243,22 @@ module.exports = class PatientService {
           message: "El usuario no existe en la base de datos.",
         };
       }
-
+      let patientId = patient._id.toString();
       let name = doctor.name;
       let lastName = doctor.lastName;
-      const token = generateResetToken(doctorId);
-      const loginForm = `${corsOrigin}/register?token=${token}`;
+
+      const token = generateFormToken(doctorId, patientId);
+
+      const base64EncodedToken = btoa(token);
+      const loginForm = `${corsOrigin}/patient/complete/${base64EncodedToken}`;
+      //const originalToken = atob(base64EncodedToken);   
+      //console.log(decodeResetToken(originalToken), "tokendespues");
+
       const mailOptions = {
         from: sanitEmail,
         to: patientEmail,
         subject: "Sanit: Formulario de paciente",
-        text: `¡Hola soy ${name} ${lastName}! Por favor completa tu perfil para poder brindarte la mejor atencion, haz clic en el siguiente enlace para acceder al formulario: ${loginForm}`,
+        text: `¡Hola ${name} ${lastName}! Por favor completa tu perfil para poder brindarte la mejor atencion, haz clic en el siguiente enlace para acceder al formulario: ${loginForm}`,
       };
       await transporter.sendMail(mailOptions);
       return {
