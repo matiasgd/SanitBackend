@@ -58,7 +58,7 @@ module.exports = class AuthService {
         email: user.email,
         profileCompleted: user.profileCompleted,
       };
-      const token = jwt.sign(payload, "your-secret-key", { expiresIn: "1h" });
+      const token = jwt.sign(payload, secret, { expiresIn: "1h" });
       // eliminar los intentos de inicio de sesión
       await deleteLoginAttempts(email);
       return {

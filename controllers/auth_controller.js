@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const AuthService = require("../services/auth_services");
 const { generateResetToken } = require("../utils/token");
-const { secret } = require("../config");
 
 module.exports = {
   userLogin: async (req, res, next) => {
@@ -57,7 +56,6 @@ module.exports = {
   updatePassword: async (req, res, next) => {
     try {
       const id = req.params.userId;
-      console.log(id, "id in controller");
       const { oldPassword, newPassword } = req.body;
       const result = await AuthService.updatePassword(
         id,
@@ -89,8 +87,10 @@ module.exports = {
     }
   },
   userLogout: (req, res) => {
-    res.clearCookie("token");
-    res.status(200).send("El usuario se ha desconectado correctamente!");
+    res.clearCookie("token", {
+      path: "/",
+    });
+    res.status(200).send("Sesión finalizada.");
   },
   userMe: (req, res) => {
     res.send(req.user);
