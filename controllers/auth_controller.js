@@ -12,12 +12,17 @@ module.exports = {
       }
       res
         .status(201)
-        .cookie("token", response.data.token)
+        .cookie("token", response.data.token, {
+          path: "/",
+          sameSite: "none",
+          secure: true,
+        })
         .send(response.data.payload);
     } catch (error) {
       next(error);
     }
   },
+
   recoverPassword: async (req, res, next) => {
     const { email } = req.body;
     try {
