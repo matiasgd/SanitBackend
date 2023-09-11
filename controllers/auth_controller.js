@@ -36,23 +36,22 @@ module.exports = {
       next(error);
     }
   },
-  // sendPasswordResetEmail: async (req, res, next) => {
-  //   const { userId } = req.params;
-  //   const { email } = req.body;
-  //   try {
-  //     const resetToken = generateResetToken(userId);
-  //     const result = await AuthService.sendPasswordResetEmail(
-  //       email,
-  //       resetToken
-  //     );
-  //     if (result.error) {
-  //       return res.status(401).send(result.message);
-  //     }
-  //     return res.status(200).send(result.message);
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // },
+  resetPassword: async (req, res, next) => {
+    const { userId, password, confirmPassword } = req.body;
+    try {
+      const result = await AuthService.updatePasswordWithToken(
+        userId,
+        confirmPassword,
+        password
+      );
+      if (result.error) {
+        return res.status(400).send(result.message);
+      }
+      return res.status(201).send(result.message);
+    } catch (error) {
+      next(error);
+    }
+  },
   updatePassword: async (req, res, next) => {
     try {
       const id = req.params.userId;
@@ -64,22 +63,6 @@ module.exports = {
       );
       if (result.error) {
         return res.status(401).send(result.message);
-      }
-      return res.status(201).send(result.message);
-    } catch (error) {
-      next(error);
-    }
-  },
-
-  resetPassword: async (req, res, next) => {
-    const { token, newPassword } = req.body;
-    try {
-      const result = await AuthService.updatePasswordWithToken(
-        token,
-        newPassword
-      );
-      if (result.error) {
-        return res.status(400).send(result.message);
       }
       return res.status(201).send(result.message);
     } catch (error) {
