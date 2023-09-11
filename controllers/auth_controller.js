@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const AuthService = require("../services/auth_services");
 const { generateResetToken } = require("../utils/token");
-const { secret } = require("../config");
 
 module.exports = {
   userLogin: async (req, res, next) => {
@@ -13,12 +12,17 @@ module.exports = {
       }
       res
         .status(201)
-        .cookie("token", response.data.token)
+        .cookie("token", response.data.token, {
+          path: "/",
+          sameSite: "none",
+          secure: true,
+        })
         .send(response.data.payload);
     } catch (error) {
       next(error);
     }
   },
+
   recoverPassword: async (req, res, next) => {
     const { email } = req.body;
     try {
@@ -37,27 +41,25 @@ module.exports = {
       next(error);
     }
   },
-  // sendPasswordResetEmail: async (req, res, next) => {
-  //   const { userId } = req.params;
-  //   const { email } = req.body;
-  //   try {
-  //     const resetToken = generateResetToken(userId);
-  //     const result = await AuthService.sendPasswordResetEmail(
-  //       email,
-  //       resetToken
-  //     );
-  //     if (result.error) {
-  //       return res.status(401).send(result.message);
-  //     }
-  //     return res.status(200).send(result.message);
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // },
+  resetPassword: async (req, res, next) => {
+    const { userId, password, confirmPassword } = req.body;
+    try {
+      const result = await AuthService.updatePasswordWithToken(
+        userId,
+        confirmPassword,
+        password
+      );
+      if (result.error) {
+        return res.status(400).send(result.message);
+      }
+      return res.status(201).send(result.message);
+    } catch (error) {
+      next(error);
+    }
+  },
   updatePassword: async (req, res, next) => {
     try {
       const id = req.params.userId;
-      console.log(id, "id in controller");
       const { oldPassword, newPassword } = req.body;
       const result = await AuthService.updatePassword(
         id,
@@ -72,25 +74,11 @@ module.exports = {
       next(error);
     }
   },
-
-  resetPassword: async (req, res, next) => {
-    const { token, newPassword } = req.body;
-    try {
-      const result = await AuthService.updatePasswordWithToken(
-        token,
-        newPassword
-      );
-      if (result.error) {
-        return res.status(400).send(result.message);
-      }
-      return res.status(201).send(result.message);
-    } catch (error) {
-      next(error);
-    }
-  },
   userLogout: (req, res) => {
-    res.clearCookie("token");
-    res.status(200).send("El usuario se ha desconectado correctamente!");
+    res.clearCookie("token", {
+      path: "/",
+    });
+    res.status(200).send("Sesión finalizada.");
   },
   userMe: (req, res) => {
     res.send(req.user);

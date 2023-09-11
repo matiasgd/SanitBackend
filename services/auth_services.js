@@ -58,7 +58,7 @@ module.exports = class AuthService {
         email: user.email,
         profileCompleted: user.profileCompleted,
       };
-      const token = jwt.sign(payload, "your-secret-key", { expiresIn: "1h" });
+      const token = jwt.sign(payload, secret, { expiresIn: "1h" });
       // eliminar los intentos de inicio de sesión
       await deleteLoginAttempts(email);
       return {
@@ -69,7 +69,7 @@ module.exports = class AuthService {
       throw error;
     }
   }
-  // recuperar contraseña
+  // recuperar contraseña por email
   static async recoverPassword(email) {
     try {
       const user = await Users.findOne({ email: email });
@@ -80,7 +80,8 @@ module.exports = class AuthService {
         };
       }
       const resetToken = generateResetToken(user._id);
-      const resetLink = `${corsOrigin}/reset-password?token=${resetToken}`;
+      const base64EncodedToken = btoa(resetToken);
+      const resetLink = `${corsOrigin}/reset-password/${base64EncodedToken}`;
       const mailOptions = {
         from: sanitEmail,
         to: email,
@@ -97,6 +98,42 @@ module.exports = class AuthService {
       throw error;
     }
   }
+  static async updatePasswordWithToken(userId, password, confirmedPassword) {
+    try {
+      if (password !== confirmedPassword) {
+        return {
+          error: true,
+          message: "Las contraseñas no coinciden",
+        };
+      }
+      const user = await Users.findById(userId);
+      if (!user) {
+        return {
+          error: true,
+          message: "No se encontró ningún usuario con el ID.",
+        };
+      }
+      user.password = confirmedPassword;
+      const updatedUser = await user.save();
+
+      const mailOptions = {
+        from: sanitEmail,
+        to: user.email,
+        subject: "Cambio de contraseña exioso!",
+        text: `¡Hola! logras cambiar tu contraseña exitosamente!`,
+      };
+      await transporter.sendMail(mailOptions);
+
+      return {
+        error: false,
+        data: updatedUser,
+        message: "Contraseña actualizada correctamente.",
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Cambio de contraseña por usuario
   static async updatePassword(id, oldPassword, newPassword) {
     try {
@@ -127,81 +164,6 @@ module.exports = class AuthService {
         error: false,
         data: updatedUser,
         message: "La contraseña se ha actualizado correctamente",
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-  // Cambio de contraseña por token
-  // static async sendPasswordResetEmail(email, resetToken) {
-  //   try {
-  //     const resetLink = `${corsOrigin}/reset-password?token=${resetToken}`;
-  //     const mailOptions = {
-  //       from: sanitEmail,
-  //       to: email,
-  //       subject: "Recuperación de contraseña",
-  //       text: `¡Hola! Para restablecer tu contraseña, haz clic en el siguiente enlace: ${resetLink}`,
-  //     };
-  //     await transporter.sendMail(mailOptions);
-  //     console.log(
-  //       `Correo electrónico de recuperación de contraseña enviado a ${email}`
-  //     );
-  //     return {
-  //       error: false,
-  //       message:
-  //         "Se ha enviado un correo electrónico para restablecer la contraseña",
-  //     };
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
-  static async updatePasswordWithToken(token, newPassword) {
-    try {
-      const secretKey = secret;
-      const decodedToken = jwt.verify(token, secretKey);
-      console.log(decodedToken, "decodedToken");
-      if (!decodedToken) {
-        return {
-          error: true,
-          message: "Token inválido",
-        };
-      }
-      const { userId } = decodedToken;
-      const result = await AuthService.resetPassword(userId, newPassword);
-      if (result.error) {
-        return {
-          error: true,
-          message: "No se pudo actualizar la contraseña",
-        };
-      }
-      return {
-        error: false,
-        message: "Contraseña actualizada exitosamente",
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-  static async resetPassword(userId, newPassword) {
-    try {
-      const user = await Users.findById(userId);
-      console.log(user, "user before password reset"); // Add this line for logging
-
-      if (!user) {
-        return {
-          error: true,
-          message:
-            "No se encontró ningún usuario con ese token de restablecimiento de contraseña.",
-        };
-      }
-
-      user.password = newPassword;
-      const updatedUser = await user.save();
-
-      return {
-        error: false,
-        data: updatedUser,
-        message: "Contraseña actualizada correctamente.",
       };
     } catch (error) {
       throw error;

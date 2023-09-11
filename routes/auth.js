@@ -21,10 +21,7 @@ router.post("/login", userLogin);
 // RECOVER PASSWORD
 router.post("/recover", recoverPassword);
 
-// // RESET PASSWORD
-// router.post("/send-reset-email/:userId", sendPasswordResetEmail);
-
-router.post("/reset-password", resetPassword);
+router.post("/resetpassword", resetPassword);
 
 // CAMBIAR CONTRASEÑA
 router.put("/newpassword/:userId", updatePassword);
